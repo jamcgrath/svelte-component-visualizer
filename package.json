@@ -1,0 +1,84 @@
+{
+  "name": "svelte-component-visualizer",
+  "displayName": "Svelte Component Visualizer",
+  "description": "Visualize Svelte component dependencies as an interactive graph",
+  "version": "0.1.0",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:svelteVisualizer.showGraph",
+    "onCommand:svelteVisualizer.refreshGraph"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "svelteVisualizer.showGraph",
+        "title": "Svelte: Show Component Visualizer",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "svelteVisualizer.refreshGraph",
+        "title": "Svelte: Refresh Component Graph",
+        "icon": "$(refresh)"
+      }
+    ],
+    "configuration": {
+      "title": "Svelte Component Visualizer",
+      "properties": {
+        "svelteVisualizer.componentPaths": {
+          "type": "array",
+          "default": [
+            "**/*.svelte"
+          ],
+          "description": "Glob patterns for component files to include in the visualization. Use negative patterns to exclude routes (e.g., '!**/routes/**/*.svelte')"
+        },
+        "svelteVisualizer.routePaths": {
+          "type": "array",
+          "default": [
+            "**/routes/**/*.svelte",
+            "**/src/routes/**/*.svelte"
+          ],
+          "description": "Glob patterns for route files to include in the visualization"
+        },
+        "svelteVisualizer.routesBasePath": {
+          "type": "string",
+          "default": "routes",
+          "description": "Base path for routes (used for route naming). Will search for this directory name anywhere in the project."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile-extension && npm run bundle-webview",
+    "compile": "npm run compile-extension",
+    "compile-extension": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "bundle-webview": "esbuild src/webview/script.js --bundle --outfile=webview/script.js --format=iife",
+    "watch": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/vsce": "^2.19.0",
+    "esbuild": "^0.25.10",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "estree-walker": "^3.0.3",
+    "glob": "^10.4.2",
+    "svelte": "^5.0.0-rc.1"
+  }
+}
