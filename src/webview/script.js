@@ -199,13 +199,9 @@ function updateGraph(selectedId) {
     })
     .call(drag(simulation))
     .on("click", (event, d) => {
-      // Send message to extension to open the file
+      // Cmd/Ctrl+Click switches to this node in the visualizer
       if (event.ctrlKey || event.metaKey) {
-        vscode.postMessage({
-          command: 'openFile',
-          componentName: d.id,
-          nodeType: d.type
-        });
+        updateGraph(d.id);
       }
     })
     .on("dblclick", (event, d) => {
