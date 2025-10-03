@@ -52,7 +52,8 @@ body {
   padding: 8px;
   cursor: pointer;
 }
-.results-list .result-item:hover {
+.results-list .result-item:hover,
+.results-list .result-item.highlighted {
   background-color: #f0f0f0;
 }
 .clear-search-btn {
@@ -217,4 +218,17 @@ svg {
   border-radius: 50%;
   margin-right: 8px;
   border: 1px solid #ccc;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

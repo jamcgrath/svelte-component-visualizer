@@ -42,6 +42,15 @@ const zoom = d3.zoom().on("zoom", (event) => {
 });
 svg.call(zoom);
 
+// --- Accessibility ---
+const a11yAnnouncer = d3.select("#a11y-announcer");
+function announceToScreenReader(message) {
+  a11yAnnouncer.text("");
+  setTimeout(() => {
+    a11yAnnouncer.text(message);
+  }, 100);
+}
+
 // Listen for messages from the extension
 window.addEventListener('message', event => {
   const message = event.data;
@@ -64,9 +73,6 @@ function initializeGraph(graph) {
 
   setupCombobox(searchInput, resultsList, clearSearchBtn, sortedComponents);
   setupCombobox(routeSearchInput, routeResultsList, routeClearSearchBtn, sortedRoutes);
-
-  // Show full graph on initial load
-  updateGraph(null);
 }
 
 function focusOnComponent(componentName, nodeType) {
@@ -89,30 +95,38 @@ function focusOnComponent(componentName, nodeType) {
 
 function populateResults(listElement, nodes, inputElement, clearBtnElement) {
   listElement.html(""); // Clear previous results
-  nodes.forEach((node) => {
+  nodes.forEach((node, index) => {
     listElement
       .append("div")
       .attr("class", "result-item")
+      .attr("role", "option")
+      .attr("id", `${listElement.attr("id")}-option-${index}`)
       .text(node.id)
       .on("click", () => {
-        inputElement.property("value", node.id);
-        listElement.style("display", "none");
-        if (clearBtnElement) {
-          clearBtnElement.style("display", "block");
-        }
-
-        // Clear the other combobox
-        if (inputElement === searchInput) {
-          routeSearchInput.property("value", "");
-          routeClearSearchBtn.style("display", "none");
-        } else {
-          searchInput.property("value", "");
-          clearSearchBtn.style("display", "none");
-        }
-
-        updateGraph(node.id);
+        selectOption(node.id, inputElement, listElement, clearBtnElement);
       });
   });
+}
+
+function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
+  inputElement.property("value", nodeId);
+  listElement.style("display", "none");
+  inputElement.attr("aria-expanded", "false");
+  if (clearBtnElement) {
+    clearBtnElement.style("display", "block");
+  }
+
+  // Clear the other combobox
+  if (inputElement === searchInput) {
+    routeSearchInput.property("value", "");
+    routeClearSearchBtn.style("display", "none");
+  } else {
+    searchInput.property("value", "");
+    clearSearchBtn.style("display", "none");
+  }
+
+  updateGraph(nodeId);
+  announceToScreenReader(`Selected ${nodeId}`);
 }
 
 function updateGraph(selectedId) {
@@ -321,10 +335,13 @@ refreshBtn.on("click", () => {
 });
 
 function setupCombobox(input, list, clearBtn, sourceData) {
+  let highlightedIndex = -1;
+
   clearBtn.on("click", () => {
     input.property("value", "");
     input.node().dispatchEvent(new Event("input"));
     svg.selectAll("g.graph-group").remove();
+    input.attr("aria-expanded", "false");
     input.node().focus();
   });
 
@@ -339,6 +356,36 @@ function setupCombobox(input, list, clearBtn, sourceData) {
     );
     populateResults(list, filteredNodes, input, clearBtn);
     list.style("display", "block");
+    input.attr("aria-expanded", "true");
+    highlightedIndex = -1;
+    input.attr("aria-activedescendant", "");
+    announceToScreenReader(`${filteredNodes.length} results found`);
+  }
+
+  function hideResults() {
+    list.style("display", "none");
+    input.attr("aria-expanded", "false");
+    input.attr("aria-activedescendant", "");
+    highlightedIndex = -1;
+  }
+
+  function highlightOption(index) {
+    const options = list.selectAll(".result-item");
+    options.classed("highlighted", false);
+
+    if (index >= 0 && index < options.size()) {
+      const option = d3.select(options.nodes()[index]);
+      option.classed("highlighted", true);
+      input.attr("aria-activedescendant", option.attr("id"));
+
+      // Scroll into view
+      const optionNode = option.node();
+      if (optionNode) {
+        optionNode.scrollIntoView({ block: "nearest" });
+      }
+    } else {
+      input.attr("aria-activedescendant", "");
+    }
   }
 
   input.on("input", function () {
@@ -349,6 +396,57 @@ function setupCombobox(input, list, clearBtn, sourceData) {
 
   input.on("focus", showResults);
   input.on("click", showResults);
+
+  input.on("keydown", (event) => {
+    const options = list.selectAll(".result-item");
+    const optionsCount = options.size();
+
+    if (list.style("display") === "none") return;
+
+    switch(event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        highlightedIndex = Math.min(highlightedIndex + 1, optionsCount - 1);
+        highlightOption(highlightedIndex);
+        break;
+
+      case "ArrowUp":
+        event.preventDefault();
+        highlightedIndex = Math.max(highlightedIndex - 1, -1);
+        highlightOption(highlightedIndex);
+        break;
+
+      case "Home":
+        event.preventDefault();
+        highlightedIndex = 0;
+        highlightOption(highlightedIndex);
+        break;
+
+      case "End":
+        event.preventDefault();
+        highlightedIndex = optionsCount - 1;
+        highlightOption(highlightedIndex);
+        break;
+
+      case "Enter":
+        event.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < optionsCount) {
+          const selectedOption = d3.select(options.nodes()[highlightedIndex]);
+          const nodeId = selectedOption.text();
+          selectOption(nodeId, input, list, clearBtn);
+        }
+        break;
+
+      case "Escape":
+        event.preventDefault();
+        hideResults();
+        break;
+
+      case "Tab":
+        hideResults();
+        break;
+    }
+  });
 }
 
 
@@ -363,6 +461,8 @@ d3.select("body").on("click", function (event) {
   if (!clickedInsideACombobox) {
     resultsList.style("display", "none");
     routeResultsList.style("display", "none");
+    searchInput.attr("aria-expanded", "false");
+    routeSearchInput.attr("aria-expanded", "false");
   }
 });
 
@@ -370,6 +470,8 @@ d3.select("body").on("keydown", (event) => {
   if (event.key === "Escape") {
     resultsList.style("display", "none");
     routeResultsList.style("display", "none");
+    searchInput.attr("aria-expanded", "false");
+    routeSearchInput.attr("aria-expanded", "false");
   }
 });
 

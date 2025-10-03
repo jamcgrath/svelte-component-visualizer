@@ -25,8 +25,13 @@
           id="search-input"
           placeholder="Type to search components..."
           autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="results-list"
+          aria-activedescendant=""
         />
-        <div id="results-list" class="results-list"></div>
+        <div id="results-list" class="results-list" role="listbox"></div>
       </div>
 
       <div class="label-wrapper">
@@ -45,8 +50,13 @@
           id="route-search-input"
           placeholder="Type to search routes..."
           autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="route-results-list"
+          aria-activedescendant=""
         />
-        <div id="route-results-list" class="results-list"></div>
+        <div id="route-results-list" class="results-list" role="listbox"></div>
       </div>
 
       <button id="show-all-btn">Show All Components</button>
@@ -115,6 +125,8 @@
       </div>
       <svg id="graph"></svg>
     </div>
+
+    <div id="a11y-announcer" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
     <script src="script.js"></script>
   </body>
