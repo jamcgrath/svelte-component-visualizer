@@ -48,6 +48,8 @@ window.addEventListener('message', event => {
 
   if (message.command === 'updateGraph') {
     initializeGraph(message.data);
+  } else if (message.command === 'focusComponent') {
+    focusOnComponent(message.componentName, message.nodeType);
   }
 });
 
@@ -65,6 +67,24 @@ function initializeGraph(graph) {
 
   // Show full graph on initial load
   updateGraph(null);
+}
+
+function focusOnComponent(componentName, nodeType) {
+  // Update the appropriate search input to show the selected component
+  if (nodeType === 'route') {
+    routeSearchInput.property("value", componentName);
+    routeClearSearchBtn.style("display", "block");
+    searchInput.property("value", "");
+    clearSearchBtn.style("display", "none");
+  } else {
+    searchInput.property("value", componentName);
+    clearSearchBtn.style("display", "block");
+    routeSearchInput.property("value", "");
+    routeClearSearchBtn.style("display", "none");
+  }
+
+  // Focus on this component in the graph
+  updateGraph(componentName);
 }
 
 function populateResults(listElement, nodes, inputElement, clearBtnElement) {

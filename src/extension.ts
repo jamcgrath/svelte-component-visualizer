@@ -27,7 +27,15 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    context.subscriptions.push(showGraphCommand, refreshGraphCommand);
+    // Register command to show specific component in graph
+    const showComponentInGraphCommand = vscode.commands.registerCommand(
+        'svelteVisualizer.showComponentInGraph',
+        async (uri: vscode.Uri) => {
+            await showComponentInVisualizer(context, uri);
+        }
+    );
+
+    context.subscriptions.push(showGraphCommand, refreshGraphCommand, showComponentInGraphCommand);
 }
 
 async function showVisualizerPanel(context: vscode.ExtensionContext) {
@@ -85,6 +93,63 @@ async function showVisualizerPanel(context: vscode.ExtensionContext) {
         // Generate and send initial graph data
         await refreshGraph(context, currentPanel);
     }
+}
+
+async function showComponentInVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri) {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+    if (!workspaceFolder) {
+        vscode.window.showErrorMessage('No workspace folder open');
+        return;
+    }
+
+    // Determine component name and type from file path
+    const config = vscode.workspace.getConfiguration('svelteVisualizer');
+    const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+    const filePath = uri.fsPath;
+
+    let componentName: string;
+    let nodeType: 'component' | 'route';
+
+    // Check if this file is in a routes directory
+    const normalizedFile = filePath.replace(/\\/g, '/');
+    const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
+
+    if (routesMatch) {
+        const routePath = path.dirname(routesMatch[2]);
+        const fileName = path.basename(filePath);
+        let fileType = '';
+
+        if (fileName.startsWith('+page')) fileType = '(page)';
+        else if (fileName.startsWith('+layout')) fileType = '(layout)';
+        else if (fileName.startsWith('+error')) fileType = '(error)';
+
+        if (fileType) {
+            componentName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
+            nodeType = 'route';
+        } else {
+            // It's a component inside the routes folder
+            componentName = path.basename(filePath, '.svelte');
+            nodeType = 'component';
+        }
+    } else {
+        componentName = path.basename(filePath, '.svelte');
+        nodeType = 'component';
+    }
+
+    // Open or reveal the visualizer panel
+    await showVisualizerPanel(context);
+
+    // Wait a bit for the panel to be ready, then send focus message
+    setTimeout(() => {
+        if (currentPanel) {
+            currentPanel.webview.postMessage({
+                command: 'focusComponent',
+                componentName: componentName,
+                nodeType: nodeType
+            });
+        }
+    }, 100);
 }
 
 async function refreshGraph(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {

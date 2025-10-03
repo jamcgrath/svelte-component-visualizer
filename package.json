@@ -13,7 +13,8 @@
   ],
   "activationEvents": [
     "onCommand:svelteVisualizer.showGraph",
-    "onCommand:svelteVisualizer.refreshGraph"
+    "onCommand:svelteVisualizer.refreshGraph",
+    "onCommand:svelteVisualizer.showComponentInGraph"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -27,8 +28,21 @@
         "command": "svelteVisualizer.refreshGraph",
         "title": "Svelte: Refresh Component Graph",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "svelteVisualizer.showComponentInGraph",
+        "title": "Open in Component Visualizer"
       }
     ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "svelteVisualizer.showComponentInGraph",
+          "when": "resourceExtname == .svelte",
+          "group": "navigation@10"
+        }
+      ]
+    },
     "configuration": {
       "title": "Svelte Component Visualizer",
       "properties": {
