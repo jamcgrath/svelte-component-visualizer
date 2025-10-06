@@ -430,7 +430,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
               <li><strong>Single Click:</strong> Select and drag nodes to reposition them</li>
               <li><strong>Cmd/Ctrl + Click:</strong> Focus on a node in the visualizer (shows only connected components)</li>
               <li><strong>Double Click:</strong> Open the component file in VS Code editor</li>
-              <li><strong>Drag & Drop:</strong> Drag a .svelte file from VS Code Explorer into the graph to focus on it</li>
+              <li><strong>Drag & Drop:</strong> Drag a .svelte file from VS Code Explorer and hold <strong>Shift</strong> while dropping it onto the graph to focus on that component</li>
             </ul>
           </section>
 
