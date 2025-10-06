@@ -68,7 +68,13 @@
         },
         "svelteVisualizer.theme": {
           "type": "string",
-          "enum": ["flat", "modern", "retro"],
+          "enum": ["flat", "modern", "retro", "retro-alt"],
+          "enumDescriptions": [
+            "Flat - Ableton-like minimal design",
+            "Modern - Rounded corners and gradients (default)",
+            "Retro - Early Mac System 6/7 (light) / Green monochrome (dark)",
+            "Retro Alt - Windows 3.1 (light) / Amber monochrome (dark)"
+          ],
           "default": "modern",
           "description": "Visual theme for the component visualizer"
         },

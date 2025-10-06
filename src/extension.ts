@@ -366,7 +366,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
     <div class="sidebar">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h1 style="margin: 0;">Component Visualizer</h1>
-        <button id="help-btn" title="Help & Instructions" style="background: none; border: 2px solid #6b7280; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; font-weight: bold; color: #6b7280; display: flex; align-items: center; justify-content: center;">?</button>
+        <button id="help-btn" class="help-btn" title="Help & Instructions">?</button>
       </div>
       <label for="search-input">Search & Select Component</label>
       <div class="combobox-container">

@@ -400,3 +400,25 @@ svg {
   font-family: var(--font-family-code);
   font-size: var(--font-size-base);
 }
+
+/* Help Button (? button) */
+.help-btn {
+  background: none;
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast) var(--easing-standard);
+}
+
+.help-btn:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}

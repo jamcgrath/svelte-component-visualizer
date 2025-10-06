@@ -645,7 +645,7 @@ function applyTheme(theme, colorScheme) {
   // Update theme CSS link
   const existingThemeLink = document.querySelector('link[data-theme-link]');
   if (existingThemeLink) {
-    const newHref = existingThemeLink.href.replace(/\/themes\/\w+\.css/, `/themes/${theme}.css`);
+    const newHref = existingThemeLink.href.replace(/\/themes\/[\w-]+\.css/, `/themes/${theme}.css`);
     existingThemeLink.href = newHref;
   }
 }

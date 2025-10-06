@@ -1,4 +1,4 @@
-/* Retro Theme - Atari/Commodore-inspired, pixel vibe, monospace */
+/* Retro Theme - 80's IBM PC/DOS monochrome monitor aesthetic */
 
 body[data-theme="retro"] {
   font-family: var(--font-family-mono);
@@ -7,71 +7,72 @@ body[data-theme="retro"] {
 }
 
 /* ========================================
-   RETRO THEME - LIGHT SCHEME TOKENS
+   RETRO THEME - LIGHT SCHEME (EARLY MAC)
+   Classic Mac System 6/7 with platinum gray background
    ======================================== */
 
 body[data-theme="retro"][data-scheme="light"] {
-  /* Backgrounds */
-  --color-bg-body: #faf6e7;
-  --color-bg-surface: #f7f3e8;
-  --color-bg-surface-gradient-start: #f7f3e8;
-  --color-bg-surface-gradient-end: #f7f3e8;
-  --color-bg-container: #f7f3e8;
-  --color-bg-container-gradient-start: #f7f3e8;
-  --color-bg-container-gradient-end: #f7f3e8;
-  --color-bg-input: #fff;
-  --color-bg-button: #fff;
-  --color-bg-button-gradient-start: #fff;
-  --color-bg-button-gradient-end: #fff;
-  --color-bg-graph: #faf6e7;
-  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  /* Backgrounds - Mac Platinum gray */
+  --color-bg-body: #dddddd;
+  --color-bg-surface: #dddddd;
+  --color-bg-surface-gradient-start: #dddddd;
+  --color-bg-surface-gradient-end: #dddddd;
+  --color-bg-container: #dddddd;
+  --color-bg-container-gradient-start: #dddddd;
+  --color-bg-container-gradient-end: #dddddd;
+  --color-bg-input: #ffffff;
+  --color-bg-button: #dddddd;
+  --color-bg-button-gradient-start: #dddddd;
+  --color-bg-button-gradient-end: #dddddd;
+  --color-bg-graph: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
 
   /* Backgrounds - Interactive States */
-  --color-bg-hover: #fffdf5;
-  --color-bg-hover-gradient-start: #f7f3e8;
-  --color-bg-hover-gradient-end: #f7f3e8;
-  --color-bg-button-hover: #fffdf5;
-  --color-bg-active: #f7f3e8;
+  --color-bg-hover: #000000;
+  --color-bg-hover-gradient-start: #000000;
+  --color-bg-hover-gradient-end: #000000;
+  --color-bg-button-hover: #cccccc;
+  --color-bg-active: #000000;
 
-  /* Text Colors */
-  --color-text-primary: #000;
-  --color-text-secondary: #000;
-  --color-text-muted: #000;
-  --color-text-inverse: #000;
-  --color-text-on-surface: #111;
-  --color-text-node: #000;
-  --color-text-help: #000;
-  --color-text-code: #000;
+  /* Text Colors - Classic Mac black */
+  --color-text-primary: #000000;
+  --color-text-secondary: #000000;
+  --color-text-muted: #666666;
+  --color-text-inverse: #ffffff;
+  --color-text-on-surface: #000000;
+  --color-text-node: #000000;
+  --color-text-help: #000000;
+  --color-text-code: #000000;
 
-  /* Border Colors */
-  --color-border-default: #000;
-  --color-border-subtle: #000;
-  --color-border-emphasis: #000;
-  --color-border-input: #000;
-  --color-border-input-focus: #000;
-  --color-border-node: #fff;
+  /* Border Colors - Black */
+  --color-border-default: #000000;
+  --color-border-subtle: #999999;
+  --color-border-emphasis: #000000;
+  --color-border-input: #000000;
+  --color-border-input-focus: #000000;
+  --color-border-node: #ffffff;
 
   /* Interactive Colors */
-  --color-interactive-primary: #000;
-  --color-interactive-hover: #000;
+  --color-interactive-primary: #000000;
+  --color-interactive-hover: #ffffff;
 
   /* Focus States */
   --color-focus-ring: transparent;
-  --color-focus-ring-inset: #000;
+  --color-focus-ring-inset: #000000;
 
   /* Range Slider */
-  --color-range-track: #fff;
-  --color-range-track-gradient-start: #fff;
-  --color-range-track-gradient-end: #fff;
-  --color-range-thumb: #fff;
-  --color-range-thumb-gradient-start: #fff;
-  --color-range-thumb-gradient-end: #fff;
-  --color-range-thumb-border: #000;
+  --color-range-track: #000000;
+  --color-range-track-gradient-start: #000000;
+  --color-range-track-gradient-end: #000000;
+  --color-range-thumb: #dddddd;
+  --color-range-thumb-gradient-start: #dddddd;
+  --color-range-thumb-gradient-end: #dddddd;
+  --color-range-thumb-border: #000000;
 
   /* Zoom Controls */
-  --color-zoom-bg: #fff;
-  --color-zoom-bg-hover: #fffdf5;
-  --color-zoom-border: #000;
+  --color-zoom-bg: #dddddd;
+  --color-zoom-bg-hover: #cccccc;
+  --color-zoom-border: #000000;
 
   /* Shadows - Retro theme uses no shadows */
   --shadow-xs: none;
@@ -196,11 +197,13 @@ body[data-theme="retro"][data-scheme="light"] .results-list {
 
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item {
   color: var(--color-text-primary);
+  background-color: var(--color-bg-input);
 }
 
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item:hover,
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item.highlighted {
   background-color: var(--color-bg-active);
+  color: var(--color-text-inverse);
 }
 
 /* Toggle controls */
@@ -303,71 +306,72 @@ body[data-theme="retro"][data-scheme="light"] .help-section code {
 }
 
 /* ========================================
-   RETRO THEME - DARK SCHEME TOKENS
+   RETRO THEME - DARK SCHEME (GREEN MONOCHROME)
+   Classic green phosphor terminal monitor
    ======================================== */
 
 body[data-theme="retro"][data-scheme="dark"] {
   /* Backgrounds */
-  --color-bg-body: #000;
-  --color-bg-surface: #0f0f0f;
-  --color-bg-surface-gradient-start: #0f0f0f;
-  --color-bg-surface-gradient-end: #0f0f0f;
-  --color-bg-container: #0f0f0f;
-  --color-bg-container-gradient-start: #0f0f0f;
-  --color-bg-container-gradient-end: #0f0f0f;
-  --color-bg-input: #000;
-  --color-bg-button: #000;
-  --color-bg-button-gradient-start: #000;
-  --color-bg-button-gradient-end: #000;
-  --color-bg-graph: #000;
-  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+  --color-bg-body: #000000;
+  --color-bg-surface: #001a00;
+  --color-bg-surface-gradient-start: #001a00;
+  --color-bg-surface-gradient-end: #001a00;
+  --color-bg-container: #001a00;
+  --color-bg-container-gradient-start: #001a00;
+  --color-bg-container-gradient-end: #001a00;
+  --color-bg-input: #000000;
+  --color-bg-button: #000000;
+  --color-bg-button-gradient-start: #000000;
+  --color-bg-button-gradient-end: #000000;
+  --color-bg-graph: #000000;
+  --color-bg-overlay: rgba(0, 0, 0, 0.9);
 
   /* Backgrounds - Interactive States */
-  --color-bg-hover: #1a1a1a;
-  --color-bg-hover-gradient-start: #1a1a1a;
-  --color-bg-hover-gradient-end: #1a1a1a;
-  --color-bg-button-hover: #1a1a1a;
-  --color-bg-active: #1a1a1a;
+  --color-bg-hover: #002600;
+  --color-bg-hover-gradient-start: #002600;
+  --color-bg-hover-gradient-end: #002600;
+  --color-bg-button-hover: #002600;
+  --color-bg-active: #002600;
 
-  /* Text Colors */
-  --color-text-primary: #f7f3e8;
-  --color-text-secondary: #f7f3e8;
-  --color-text-muted: #f7f3e8;
-  --color-text-inverse: #f7f3e8;
-  --color-text-on-surface: #f7f3e8;
-  --color-text-node: #f7f3e8;
-  --color-text-help: #f7f3e8;
-  --color-text-code: #f7f3e8;
+  /* Text Colors - Green phosphor */
+  --color-text-primary: #33ff33;
+  --color-text-secondary: #00ff00;
+  --color-text-muted: #00cc00;
+  --color-text-inverse: #33ff33;
+  --color-text-on-surface: #33ff33;
+  --color-text-node: #33ff33;
+  --color-text-help: #33ff33;
+  --color-text-code: #00ff00;
 
-  /* Border Colors */
-  --color-border-default: #f7f3e8;
-  --color-border-subtle: #f7f3e8;
-  --color-border-emphasis: #f7f3e8;
-  --color-border-input: #f7f3e8;
-  --color-border-input-focus: #f7f3e8;
-  --color-border-node: #fff;
+  /* Border Colors - Green */
+  --color-border-default: #33ff33;
+  --color-border-subtle: #00cc00;
+  --color-border-emphasis: #33ff33;
+  --color-border-input: #33ff33;
+  --color-border-input-focus: #66ff66;
+  --color-border-node: #000000;
 
   /* Interactive Colors */
-  --color-interactive-primary: #f7f3e8;
-  --color-interactive-hover: #fff;
+  --color-interactive-primary: #33ff33;
+  --color-interactive-hover: #66ff66;
 
   /* Focus States */
   --color-focus-ring: transparent;
-  --color-focus-ring-inset: #f7f3e8;
+  --color-focus-ring-inset: #33ff33;
 
   /* Range Slider */
-  --color-range-track: #000;
-  --color-range-track-gradient-start: #000;
-  --color-range-track-gradient-end: #000;
-  --color-range-thumb: #000;
-  --color-range-thumb-gradient-start: #000;
-  --color-range-thumb-gradient-end: #000;
-  --color-range-thumb-border: #f7f3e8;
+  --color-range-track: #33ff33;
+  --color-range-track-gradient-start: #33ff33;
+  --color-range-track-gradient-end: #33ff33;
+  --color-range-thumb: #000000;
+  --color-range-thumb-gradient-start: #000000;
+  --color-range-thumb-gradient-end: #000000;
+  --color-range-thumb-border: #33ff33;
 
   /* Zoom Controls */
-  --color-zoom-bg: #000;
-  --color-zoom-bg-hover: #1a1a1a;
-  --color-zoom-border: #f7f3e8;
+  --color-zoom-bg: #000000;
+  --color-zoom-bg-hover: #002600;
+  --color-zoom-border: #33ff33;
 
   /* Shadows - Retro theme uses no shadows */
   --shadow-xs: none;
