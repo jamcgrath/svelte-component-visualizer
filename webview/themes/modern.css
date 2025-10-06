@@ -332,6 +332,10 @@ body[data-theme="modern"][data-scheme="dark"] .node-text {
   fill: #e7e9ee;
 }
 
+body[data-theme="modern"][data-scheme="dark"] .help-section h3 {
+  color: #e7e9ee;
+}
+
 body[data-theme="modern"][data-scheme="dark"] .help-section code {
   background-color: #1a1d2a;
   color: #c6c9d8;

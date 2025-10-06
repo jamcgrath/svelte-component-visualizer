@@ -232,6 +232,7 @@ body[data-theme="retro"][data-scheme="light"] .clear-search-btn:hover {
 body[data-theme="retro"][data-scheme="light"] .node-text {
   fill: #000;
   font-family: inherit;
+  text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-section code {
@@ -462,6 +463,11 @@ body[data-theme="retro"][data-scheme="dark"] .clear-search-btn:hover {
 body[data-theme="retro"][data-scheme="dark"] .node-text {
   fill: #f7f3e8;
   font-family: inherit;
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-section h3 {
+  color: #f7f3e8;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-section code {

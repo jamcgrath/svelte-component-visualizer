@@ -241,7 +241,7 @@ function updateWebviewTheme() {
     });
 }
 
-async function refreshGraph(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
+async function refreshGraph(_context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
     if (!workspaceFolder) {
@@ -480,7 +480,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         </div>
         <div class="help-dialog-body">
           <section class="help-section">
-            <h3>🖱️ Interacting with Nodes</h3>
+            <h3>Interacting with Nodes</h3>
             <ul>
               <li><strong>Single Click:</strong> Select and drag nodes to reposition them</li>
               <li><strong>Cmd/Ctrl + Click:</strong> Focus on a node in the visualizer (shows only connected components)</li>
@@ -490,7 +490,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
           </section>
 
           <section class="help-section">
-            <h3>🎨 Node Colors & Types</h3>
+            <h3>Node Colors & Types</h3>
             <ul>
               <li><strong style="color: #ff6347;">Red:</strong> Currently selected component</li>
               <li><strong style="color: #4682b4;">Blue:</strong> Parent (uses the selected component)</li>
@@ -505,15 +505,15 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             <p>Components shown with <strong>orange color and dashed borders</strong> are imported but not directly referenced in the template.</p>
             <p><strong>These may be:</strong></p>
             <ul>
-              <li>✅ <strong>Safe to remove</strong> - Cleanup opportunity for unused code</li>
-              <li>⚡ <strong>Used dynamically</strong> - Referenced via <code>&lt;svelte:component&gt;</code>, JavaScript logic, or dynamic imports</li>
+              <li><strong>Safe to remove</strong> - Cleanup opportunity for unused code</li>
+              <li><strong>Used dynamically</strong> - Referenced via <code>&lt;svelte:component&gt;</code>, JavaScript logic, or dynamic imports</li>
             </ul>
             <p style="font-style: italic; color: #666; font-size: 0.9em;">Always verify before removing to ensure they're not used dynamically!</p>
             <p style="margin-top: 12px;"><strong>💡 Tip:</strong> Use the <strong>"Show Unused Imports"</strong> checkbox below the legend to toggle their visibility in the graph.</p>
           </section>
 
           <section class="help-section">
-            <h3>🔍 Search & Filter</h3>
+            <h3>Search & Filter</h3>
             <ul>
               <li>Use the search boxes to find and focus on specific components or routes</li>
               <li>Click "Show All Components" to view the complete graph</li>
