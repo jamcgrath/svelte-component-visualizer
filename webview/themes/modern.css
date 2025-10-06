@@ -60,12 +60,9 @@ body[data-theme="modern"][data-scheme="light"] .legend {
 /* Range inputs */
 body[data-theme="modern"][data-scheme="light"] input[type="range"] {
   -webkit-appearance: none;
-  background: transparent;
-}
-
-body[data-theme="modern"][data-scheme="light"] input[type="range"]::-webkit-slider-track {
-  background: linear-gradient(90deg, #dfe3f8, #e9ecf7);
+  appearance: none;
   height: 6px;
+  background: linear-gradient(90deg, #dfe3f8, #e9ecf7);
   border-radius: 3px;
 }
 
@@ -84,6 +81,7 @@ body[data-theme="modern"][data-scheme="light"] input[type="range"]::-moz-range-t
   background: linear-gradient(90deg, #dfe3f8, #e9ecf7);
   height: 6px;
   border-radius: 3px;
+  border: none;
 }
 
 body[data-theme="modern"][data-scheme="light"] input[type="range"]::-moz-range-thumb {
@@ -223,23 +221,39 @@ body[data-theme="modern"][data-scheme="dark"] .legend {
   border-top: 1px solid #23283a;
 }
 
-body[data-theme="modern"][data-scheme="dark"] input[type="range"]::-webkit-slider-track {
-  background: linear-gradient(90deg, #2a2f44, #23283a);
+body[data-theme="modern"][data-scheme="dark"] input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, #404968, #3a4157);
+  border-radius: 3px;
 }
 
 body[data-theme="modern"][data-scheme="dark"] input[type="range"]::-webkit-slider-thumb {
-  background: linear-gradient(180deg, #1a1d2a, #141826);
-  border: 1px solid #2a2f44;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(180deg, #2d3142, #252836);
+  border: 1px solid #4a5270;
+  border-radius: 50%;
+  cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 body[data-theme="modern"][data-scheme="dark"] input[type="range"]::-moz-range-track {
-  background: linear-gradient(90deg, #2a2f44, #23283a);
+  background: linear-gradient(90deg, #404968, #3a4157);
+  height: 6px;
+  border-radius: 3px;
+  border: none;
 }
 
 body[data-theme="modern"][data-scheme="dark"] input[type="range"]::-moz-range-thumb {
-  background: linear-gradient(180deg, #1a1d2a, #141826);
-  border: 1px solid #2a2f44;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(180deg, #2d3142, #252836);
+  border: 1px solid #4a5270;
+  border-radius: 50%;
+  cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 

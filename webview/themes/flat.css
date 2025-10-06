@@ -60,10 +60,7 @@ body[data-theme="flat"][data-scheme="dark"] .legend {
 /* Range inputs - 4px line, square thumb */
 body[data-theme="flat"][data-scheme="dark"] input[type="range"] {
   -webkit-appearance: none;
-  background: transparent;
-}
-
-body[data-theme="flat"][data-scheme="dark"] input[type="range"]::-webkit-slider-track {
+  appearance: none;
   height: 4px;
   background: #7a7a7a;
   border: none;
@@ -247,7 +244,9 @@ body[data-theme="flat"][data-scheme="light"] .legend {
   border-top: 2px solid #2b2b2b;
 }
 
-body[data-theme="flat"][data-scheme="light"] input[type="range"]::-webkit-slider-track {
+body[data-theme="flat"][data-scheme="light"] input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
   height: 4px;
   background: #2b2b2b;
   border: none;
