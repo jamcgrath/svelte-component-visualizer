@@ -316,6 +316,56 @@ d3.select("body").on("keydown.help", (event) => {
   }
 });
 
+// --- Drag and Drop ---
+const graphContainerEl = document.getElementById("graph-container");
+
+// Prevent default drag behavior
+graphContainerEl.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
+  graphContainerEl.style.backgroundColor = "#e8f4f8";
+  graphContainerEl.style.outline = "3px dashed #4682b4";
+});
+
+graphContainerEl.addEventListener("dragleave", (event) => {
+  if (event.target === graphContainerEl) {
+    graphContainerEl.style.backgroundColor = "";
+    graphContainerEl.style.outline = "";
+  }
+});
+
+graphContainerEl.addEventListener("drop", (event) => {
+  event.preventDefault();
+  graphContainerEl.style.backgroundColor = "";
+  graphContainerEl.style.outline = "";
+
+  // VS Code provides file URIs in dataTransfer
+  const text = event.dataTransfer.getData("text/plain");
+
+  // Try to extract file path from the dropped data
+  // VS Code drag format can vary, so we'll handle multiple formats
+  let filePath = null;
+
+  if (text) {
+    // Handle VS Code URI format (file:// or vscode-resource://)
+    const uriMatch = text.match(/(?:file:\/\/|vscode-resource:\/\/)(.+\.svelte)/);
+    if (uriMatch) {
+      filePath = decodeURIComponent(uriMatch[1]);
+    } else if (text.endsWith('.svelte')) {
+      // Direct file path
+      filePath = text;
+    }
+  }
+
+  if (filePath) {
+    // Send message to extension to identify and focus the component
+    vscode.postMessage({
+      command: 'focusFileInGraph',
+      filePath: filePath
+    });
+  }
+});
+
 // --- Event Listeners ---
 const showAllBtn = d3.select("#show-all-btn");
 const refreshBtn = d3.select("#refresh-btn");
