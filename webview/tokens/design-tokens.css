@@ -1,0 +1,619 @@
+/**
+ * Design Tokens for Svelte Component Visualizer
+ *
+ * This file defines all design tokens used across the application.
+ * Tokens are organized into base tokens (shared) and semantic tokens (theme-aware).
+ *
+ * Usage:
+ *   background: var(--color-bg-surface);
+ *   padding: var(--spacing-md);
+ *   border-radius: var(--radius-lg);
+ */
+
+:root {
+  /* ========================================
+     SPACING TOKENS
+     ======================================== */
+  --spacing-xs: 5px;
+  --spacing-sm: 8px;
+  --spacing-md: 10px;
+  --spacing-lg: 15px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 25px;
+
+  /* ========================================
+     TYPOGRAPHY TOKENS
+     ======================================== */
+
+  /* Font Families */
+  --font-family-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-family-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-family-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-base: 0.9em;
+  --font-size-lg: 1em;
+  --font-size-xl: 1.1em;
+  --font-size-2xl: 1.2em;
+  --font-size-3xl: 1.5em;
+  --font-size-4xl: 18px;
+  --font-size-5xl: 20px;
+  --font-size-6xl: 28px;
+  --font-size-7xl: 32px;
+
+  /* Line Heights */
+  --line-height-tight: 1;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.7;
+
+  /* Letter Spacing */
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.4px;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* ========================================
+     BORDER TOKENS
+     ======================================== */
+
+  /* Border Widths */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 4px;
+
+  /* Border Radii */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+  --radius-full: 50%;
+
+  /* ========================================
+     SHADOW TOKENS
+     ======================================== */
+
+  /* Elevation Shadows */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 10px 24px rgba(0, 0, 0, 0.08);
+  --shadow-2xl: 0 22px 44px rgba(0, 0, 0, 0.15);
+
+  /* Dark mode shadows */
+  --shadow-dark-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-dark-md: 0 6px 14px rgba(0, 0, 0, 0.5);
+  --shadow-dark-lg: 0 8px 16px rgba(0, 0, 0, 0.6);
+  --shadow-dark-xl: 0 10px 28px rgba(0, 0, 0, 0.45);
+
+  /* Inset Shadows */
+  --shadow-inset: inset 0 0 0 1px;
+
+  /* ========================================
+     SIZING TOKENS
+     ======================================== */
+
+  /* Sidebar */
+  --sidebar-width: 250px;
+
+  /* Controls */
+  --control-height-sm: 32px;
+  --control-height-md: 16px;
+  --control-height-lg: 18px;
+
+  /* Icons */
+  --icon-size-sm: 12px;
+  --icon-size-md: 14px;
+  --icon-size-lg: 16px;
+
+  /* ========================================
+     OPACITY TOKENS
+     ======================================== */
+
+  --opacity-disabled: 0.5;
+  --opacity-muted: 0.6;
+  --opacity-subtle: 0.7;
+  --opacity-medium: 0.8;
+  --opacity-strong: 0.9;
+  --opacity-overlay-light: 0.4;
+  --opacity-overlay-medium: 0.6;
+  --opacity-overlay-dark: 0.7;
+  --opacity-overlay-darker: 0.8;
+
+  /* ========================================
+     ANIMATION TOKENS
+     ======================================== */
+
+  --transition-fast: 0.2s;
+  --transition-medium: 0.3s;
+  --easing-standard: ease;
+  --easing-out: ease-out;
+
+  /* ========================================
+     Z-INDEX TOKENS
+     ======================================== */
+
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 10;
+  --z-modal: 1000;
+
+  /* ========================================
+     SEMANTIC COLOR TOKENS
+     Default: Modern Light Theme
+     ======================================== */
+
+  /* Backgrounds */
+  --color-bg-body: #f4f4f4;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-gradient-start: #ffffff;
+  --color-bg-surface-gradient-end: #fafafa;
+  --color-bg-container: #fafafa;
+  --color-bg-container-gradient-start: #fafafa;
+  --color-bg-container-gradient-end: #f4f6ff;
+  --color-bg-input: #ffffff;
+  --color-bg-button: #fff;
+  --color-bg-button-gradient-start: #fff;
+  --color-bg-button-gradient-end: #f4f6ff;
+  --color-bg-graph: #ffffff;
+  --color-bg-graph-gradient-start: #ffffff;
+  --color-bg-graph-gradient-end: #f8f8f8;
+  --color-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #f4f6ff;
+  --color-bg-hover-gradient-start: #f4f6ff;
+  --color-bg-hover-gradient-end: #e9edff;
+  --color-bg-button-hover: rgba(255, 255, 255, 1);
+  --color-bg-active: #e9edff;
+
+  /* Text Colors */
+  --color-text-primary: #1b1e3a;
+  --color-text-secondary: #5a5d78;
+  --color-text-muted: #5a5d78;
+  --color-text-inverse: #ffffff;
+  --color-text-on-surface: #111;
+  --color-text-node: #333;
+  --color-text-help: #333;
+  --color-text-code: #d4d4d4;
+
+  /* Border Colors */
+  --color-border-default: #dfe3f8;
+  --color-border-subtle: #e9ecf7;
+  --color-border-emphasis: #dfe3f8;
+  --color-border-input: #dfe3f8;
+  --color-border-input-focus: #dfe3f8;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #4a90e2;
+  --color-interactive-hover: #1b1e3a;
+
+  /* Focus States */
+  --color-focus-ring: #e9edff;
+  --color-focus-ring-inset: #000;
+
+  /* Range Slider */
+  --color-range-track: #dfe3f8;
+  --color-range-track-gradient-start: #dfe3f8;
+  --color-range-track-gradient-end: #e9ecf7;
+  --color-range-thumb: #fff;
+  --color-range-thumb-gradient-start: #fff;
+  --color-range-thumb-gradient-end: #f4f6ff;
+  --color-range-thumb-border: #dfe3f8;
+
+  /* Zoom Controls */
+  --color-zoom-bg: rgba(255, 255, 255, 0.9);
+  --color-zoom-bg-hover: rgba(255, 255, 255, 1);
+  --color-zoom-border: #dfe3f8;
+
+  /* Graph Elements */
+  --color-link-default: #999;
+  --color-link-opacity: 0.6;
+  --color-link-unused-opacity: 0.4;
+
+  /* Node Colors - Graph Visualization */
+  --color-node-selected: #ff6347;
+  --color-node-parent: #4682b4;
+  --color-node-child: #32cd32;
+  --color-node-default: #3182bd;
+  --color-node-route: #9b59b6;
+  --color-node-unused: #ffa500;
+  --color-node-unused-selected: #ff8c00;
+  --color-node-unused-parent: #ff8c00;
+  --color-node-unused-child: #ffb347;
+
+  /* Node States */
+  --color-node-stroke: #fff;
+  --color-node-stroke-width: 1.5px;
+  --color-node-unused-opacity: 0.7;
+  --color-node-unused-selected-opacity: 0.9;
+  --color-node-unused-parent-opacity: 0.8;
+  --color-node-unused-child-opacity: 0.8;
+
+  /* Special Effects */
+  --backdrop-filter-blur: blur(8px);
+  --backdrop-filter-blur-strong: blur(10px);
+}
+
+/* ========================================
+   MODERN THEME - DARK SCHEME
+   ======================================== */
+
+body[data-theme="modern"][data-scheme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #0f1118;
+  --color-bg-surface: #171a24;
+  --color-bg-surface-gradient-start: #171a24;
+  --color-bg-surface-gradient-end: #14161e;
+  --color-bg-container: #171a24;
+  --color-bg-container-gradient-start: #171a24;
+  --color-bg-container-gradient-end: #14161e;
+  --color-bg-input: #0f1118;
+  --color-bg-button: #1a1d2a;
+  --color-bg-button-gradient-start: #1a1d2a;
+  --color-bg-button-gradient-end: #141826;
+  --color-bg-graph: #181b28;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #1a1d2a;
+  --color-bg-hover-gradient-start: #1a1d2a;
+  --color-bg-hover-gradient-end: #1f2332;
+  --color-bg-button-hover: rgba(26, 29, 42, 0.9);
+  --color-bg-active: #1f2332;
+
+  /* Text Colors */
+  --color-text-primary: #e7e9ee;
+  --color-text-secondary: #c6c9d8;
+  --color-text-muted: #c6c9d8;
+  --color-text-inverse: #e7e9ee;
+  --color-text-on-surface: #e7e9ee;
+  --color-text-node: #e7e9ee;
+  --color-text-help: #e7e9ee;
+  --color-text-code: #c6c9d8;
+
+  /* Border Colors */
+  --color-border-default: #2a2f44;
+  --color-border-subtle: #23283a;
+  --color-border-emphasis: #2a2f44;
+  --color-border-input: #2a2f44;
+  --color-border-input-focus: #2a2f44;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #4a90e2;
+  --color-interactive-hover: #e7e9ee;
+
+  /* Focus States */
+  --color-focus-ring: #293158;
+  --color-focus-ring-inset: #f7f3e8;
+
+  /* Range Slider */
+  --color-range-track: #404968;
+  --color-range-track-gradient-start: #404968;
+  --color-range-track-gradient-end: #3a4157;
+  --color-range-thumb: #2d3142;
+  --color-range-thumb-gradient-start: #2d3142;
+  --color-range-thumb-gradient-end: #252836;
+  --color-range-thumb-border: #4a5270;
+
+  /* Zoom Controls */
+  --color-zoom-bg: rgba(18, 20, 28, 0.75);
+  --color-zoom-bg-hover: rgba(26, 29, 42, 0.9);
+  --color-zoom-border: #2a2f44;
+}
+
+/* ========================================
+   FLAT THEME - LIGHT SCHEME
+   ======================================== */
+
+body[data-theme="flat"][data-scheme="light"] {
+  /* Backgrounds */
+  --color-bg-body: #ffffff;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-gradient-start: #ffffff;
+  --color-bg-surface-gradient-end: #ffffff;
+  --color-bg-container: transparent;
+  --color-bg-container-gradient-start: transparent;
+  --color-bg-container-gradient-end: transparent;
+  --color-bg-input: #fff;
+  --color-bg-button: #fff;
+  --color-bg-button-gradient-start: #fff;
+  --color-bg-button-gradient-end: #fff;
+  --color-bg-graph: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #f2f2f2;
+  --color-bg-hover-gradient-start: #f2f2f2;
+  --color-bg-hover-gradient-end: #f2f2f2;
+  --color-bg-button-hover: #f2f2f2;
+  --color-bg-active: #f2f2f2;
+
+  /* Text Colors */
+  --color-text-primary: #111;
+  --color-text-secondary: #111;
+  --color-text-muted: #555;
+  --color-text-inverse: #111;
+  --color-text-on-surface: #111;
+  --color-text-node: #111;
+  --color-text-help: #111;
+  --color-text-code: #111;
+
+  /* Border Colors */
+  --color-border-default: #2b2b2b;
+  --color-border-subtle: #2b2b2b;
+  --color-border-emphasis: #2b2b2b;
+  --color-border-input: #2b2b2b;
+  --color-border-input-focus: #555;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #2b2b2b;
+  --color-interactive-hover: #111;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #000;
+
+  /* Range Slider */
+  --color-range-track: #2b2b2b;
+  --color-range-track-gradient-start: #2b2b2b;
+  --color-range-track-gradient-end: #2b2b2b;
+  --color-range-thumb: #ffffff;
+  --color-range-thumb-gradient-start: #ffffff;
+  --color-range-thumb-gradient-end: #ffffff;
+  --color-range-thumb-border: #2b2b2b;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #fff;
+  --color-zoom-bg-hover: #f2f2f2;
+  --color-zoom-border: #2b2b2b;
+
+  /* Shadows - Flat theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+}
+
+/* ========================================
+   FLAT THEME - DARK SCHEME
+   ======================================== */
+
+body[data-theme="flat"][data-scheme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #2b2b2b;
+  --color-bg-surface: #2b2b2b;
+  --color-bg-surface-gradient-start: #2b2b2b;
+  --color-bg-surface-gradient-end: #2b2b2b;
+  --color-bg-container: transparent;
+  --color-bg-container-gradient-start: transparent;
+  --color-bg-container-gradient-end: transparent;
+  --color-bg-input: #1f1f1f;
+  --color-bg-button: #2b2b2b;
+  --color-bg-button-gradient-start: #2b2b2b;
+  --color-bg-button-gradient-end: #2b2b2b;
+  --color-bg-graph: #2b2b2b;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #303030;
+  --color-bg-hover-gradient-start: #303030;
+  --color-bg-hover-gradient-end: #303030;
+  --color-bg-button-hover: #303030;
+  --color-bg-active: #303030;
+
+  /* Text Colors */
+  --color-text-primary: #f2f2f2;
+  --color-text-secondary: #d4d4d4;
+  --color-text-muted: #d4d4d4;
+  --color-text-inverse: #f2f2f2;
+  --color-text-on-surface: #f2f2f2;
+  --color-text-node: #e9e9e9;
+  --color-text-help: #e9e9e9;
+  --color-text-code: #d4d4d4;
+
+  /* Border Colors */
+  --color-border-default: #515151;
+  --color-border-subtle: #4a4a4a;
+  --color-border-emphasis: #515151;
+  --color-border-input: #515151;
+  --color-border-input-focus: #7a7a7a;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #7a7a7a;
+  --color-interactive-hover: #f2f2f2;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #f7f3e8;
+
+  /* Range Slider */
+  --color-range-track: #7a7a7a;
+  --color-range-track-gradient-start: #7a7a7a;
+  --color-range-track-gradient-end: #7a7a7a;
+  --color-range-thumb: #2b2b2b;
+  --color-range-thumb-gradient-start: #2b2b2b;
+  --color-range-thumb-gradient-end: #2b2b2b;
+  --color-range-thumb-border: #f0f0f0;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #2b2b2b;
+  --color-zoom-bg-hover: #303030;
+  --color-zoom-border: #515151;
+
+  /* Shadows - Flat theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+}
+
+/* ========================================
+   RETRO THEME - LIGHT SCHEME
+   ======================================== */
+
+body[data-theme="retro"][data-scheme="light"] {
+  /* Backgrounds */
+  --color-bg-body: #faf6e7;
+  --color-bg-surface: #f7f3e8;
+  --color-bg-surface-gradient-start: #f7f3e8;
+  --color-bg-surface-gradient-end: #f7f3e8;
+  --color-bg-container: #f7f3e8;
+  --color-bg-container-gradient-start: #f7f3e8;
+  --color-bg-container-gradient-end: #f7f3e8;
+  --color-bg-input: #fff;
+  --color-bg-button: #fff;
+  --color-bg-button-gradient-start: #fff;
+  --color-bg-button-gradient-end: #fff;
+  --color-bg-graph: #faf6e7;
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #fffdf5;
+  --color-bg-hover-gradient-start: #f7f3e8;
+  --color-bg-hover-gradient-end: #f7f3e8;
+  --color-bg-button-hover: #fffdf5;
+  --color-bg-active: #f7f3e8;
+
+  /* Text Colors */
+  --color-text-primary: #000;
+  --color-text-secondary: #000;
+  --color-text-muted: #000;
+  --color-text-inverse: #000;
+  --color-text-on-surface: #111;
+  --color-text-node: #000;
+  --color-text-help: #000;
+  --color-text-code: #000;
+
+  /* Border Colors */
+  --color-border-default: #000;
+  --color-border-subtle: #000;
+  --color-border-emphasis: #000;
+  --color-border-input: #000;
+  --color-border-input-focus: #000;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #000;
+  --color-interactive-hover: #000;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #000;
+
+  /* Range Slider */
+  --color-range-track: #fff;
+  --color-range-track-gradient-start: #fff;
+  --color-range-track-gradient-end: #fff;
+  --color-range-thumb: #fff;
+  --color-range-thumb-gradient-start: #fff;
+  --color-range-thumb-gradient-end: #fff;
+  --color-range-thumb-border: #000;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #fff;
+  --color-zoom-bg-hover: #fffdf5;
+  --color-zoom-border: #000;
+
+  /* Shadows - Retro theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+}
+
+/* ========================================
+   RETRO THEME - DARK SCHEME
+   ======================================== */
+
+body[data-theme="retro"][data-scheme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #000;
+  --color-bg-surface: #0f0f0f;
+  --color-bg-surface-gradient-start: #0f0f0f;
+  --color-bg-surface-gradient-end: #0f0f0f;
+  --color-bg-container: #0f0f0f;
+  --color-bg-container-gradient-start: #0f0f0f;
+  --color-bg-container-gradient-end: #0f0f0f;
+  --color-bg-input: #000;
+  --color-bg-button: #000;
+  --color-bg-button-gradient-start: #000;
+  --color-bg-button-gradient-end: #000;
+  --color-bg-graph: #000;
+  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #1a1a1a;
+  --color-bg-hover-gradient-start: #1a1a1a;
+  --color-bg-hover-gradient-end: #1a1a1a;
+  --color-bg-button-hover: #1a1a1a;
+  --color-bg-active: #1a1a1a;
+
+  /* Text Colors */
+  --color-text-primary: #f7f3e8;
+  --color-text-secondary: #f7f3e8;
+  --color-text-muted: #f7f3e8;
+  --color-text-inverse: #f7f3e8;
+  --color-text-on-surface: #f7f3e8;
+  --color-text-node: #f7f3e8;
+  --color-text-help: #f7f3e8;
+  --color-text-code: #f7f3e8;
+
+  /* Border Colors */
+  --color-border-default: #f7f3e8;
+  --color-border-subtle: #f7f3e8;
+  --color-border-emphasis: #f7f3e8;
+  --color-border-input: #f7f3e8;
+  --color-border-input-focus: #f7f3e8;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #f7f3e8;
+  --color-interactive-hover: #fff;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #f7f3e8;
+
+  /* Range Slider */
+  --color-range-track: #000;
+  --color-range-track-gradient-start: #000;
+  --color-range-track-gradient-end: #000;
+  --color-range-thumb: #000;
+  --color-range-thumb-gradient-start: #000;
+  --color-range-thumb-gradient-end: #000;
+  --color-range-thumb-border: #f7f3e8;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #000;
+  --color-zoom-bg-hover: #1a1a1a;
+  --color-zoom-border: #f7f3e8;
+
+  /* Shadows - Retro theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+}

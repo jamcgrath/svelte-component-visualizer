@@ -325,6 +325,9 @@ async function openComponentFile(componentName: string, nodeType: string) {
 }
 
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview): string {
+    const tokensUri = webview.asWebviewUri(
+        vscode.Uri.file(path.join(context.extensionPath, 'webview', 'tokens', 'design-tokens.css'))
+    );
     const styleUri = webview.asWebviewUri(
         vscode.Uri.file(path.join(context.extensionPath, 'webview', 'style.css'))
     );
@@ -355,6 +358,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https:;">
     <title>Component Dependency Graph</title>
+    <link rel="stylesheet" href="${tokensUri}" />
     <link rel="stylesheet" href="${styleUri}" />
     <link rel="stylesheet" href="${themeUri}" data-theme-link />
   </head>

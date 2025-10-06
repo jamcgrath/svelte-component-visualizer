@@ -1,57 +1,57 @@
 /* Retro Theme - Atari/Commodore-inspired, pixel vibe, monospace */
 
 body[data-theme="retro"] {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  letter-spacing: 0.4px;
+  font-family: var(--font-family-mono);
+  letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
 }
 
 /* Light scheme (default for retro - off-white paper) */
 body[data-theme="retro"][data-scheme="light"] {
-  background-color: #faf6e7;
-  color: #000;
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar {
-  background: #f7f3e8;
-  border-right: 2px solid #000;
-  box-shadow: none;
+  background: var(--color-bg-surface);
+  border-right: var(--border-width-medium) solid var(--color-border-default);
+  box-shadow: var(--shadow-none);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar h1,
 body[data-theme="retro"][data-scheme="light"] .sidebar h2 {
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar label {
-  color: #000;
-  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar input[type="text"] {
-  border: 2px solid #000;
-  border-radius: 0;
-  background: #fff;
-  color: #111;
+  border: var(--border-width-medium) solid var(--color-border-input);
+  border-radius: var(--radius-none);
+  background: var(--color-bg-input);
+  color: var(--color-text-on-surface);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar input[type="text"]:focus {
   outline: none;
-  box-shadow: inset 0 0 0 1px #000;
+  box-shadow: var(--shadow-inset) var(--color-focus-ring-inset);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar button,
 body[data-theme="retro"][data-scheme="light"] #show-all-btn,
 body[data-theme="retro"][data-scheme="light"] #refresh-btn {
-  border: 2px solid #000;
-  border-radius: 0;
-  background: #fff;
-  color: #000;
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  background: var(--color-bg-button);
+  color: var(--color-text-primary);
   font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.4px;
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 body[data-theme="retro"][data-scheme="light"] .sidebar button:active,
@@ -63,107 +63,107 @@ body[data-theme="retro"][data-scheme="light"] #refresh-btn:active {
 body[data-theme="retro"][data-scheme="light"] .sidebar button:hover,
 body[data-theme="retro"][data-scheme="light"] #show-all-btn:hover,
 body[data-theme="retro"][data-scheme="light"] #refresh-btn:hover {
-  background: #fffdf5;
-  box-shadow: none;
+  background: var(--color-bg-hover);
+  box-shadow: var(--shadow-none);
 }
 
 body[data-theme="retro"][data-scheme="light"] .controls {
-  border-top: 2px solid #000;
+  border-top: var(--border-width-medium) solid var(--color-border-default);
 }
 
 body[data-theme="retro"][data-scheme="light"] .legend {
-  border-top: 2px solid #000;
+  border-top: var(--border-width-medium) solid var(--color-border-default);
 }
 
 /* Range inputs - square thumb, no radius rail */
 body[data-theme="retro"][data-scheme="light"] input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 8px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
+  height: var(--spacing-sm);
+  background: var(--color-range-track);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="light"] input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  background: var(--color-range-thumb);
+  border: var(--border-width-medium) solid var(--color-range-thumb-border);
+  border-radius: var(--radius-none);
   cursor: pointer;
 }
 
 body[data-theme="retro"][data-scheme="light"] input[type="range"]::-moz-range-track {
-  height: 8px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
+  height: var(--spacing-sm);
+  background: var(--color-range-track);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="light"] input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  background: var(--color-range-thumb);
+  border: var(--border-width-medium) solid var(--color-range-thumb-border);
+  border-radius: var(--radius-none);
   cursor: pointer;
 }
 
 /* Combobox dropdown */
 body[data-theme="retro"][data-scheme="light"] .results-list {
-  border: 2px solid #000;
-  border-radius: 0;
-  background-color: #fff;
-  box-shadow: none;
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  background-color: var(--color-bg-input);
+  box-shadow: var(--shadow-none);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item {
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item:hover,
 body[data-theme="retro"][data-scheme="light"] .results-list .result-item.highlighted {
-  background-color: #f7f3e8;
+  background-color: var(--color-bg-active);
 }
 
 /* Toggle controls */
 body[data-theme="retro"][data-scheme="light"] .toggle-controls {
-  background: #f7f3e8;
-  border: 2px solid #000;
-  border-radius: 0;
+  background: var(--color-bg-container);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="light"] .toggle-controls span {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 body[data-theme="retro"][data-scheme="light"] .toggle-controls input[type="checkbox"] {
-  accent-color: #000;
+  accent-color: var(--color-interactive-primary);
 }
 
 /* Help dialog */
 body[data-theme="retro"][data-scheme="light"] .help-dialog {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--color-bg-overlay);
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-dialog-content {
-  background: #f7f3e8;
-  border: 2px solid #000;
-  border-radius: 0;
-  box-shadow: none;
-  color: #000;
+  background: var(--color-bg-surface);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  box-shadow: var(--shadow-none);
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-dialog-header {
-  border-bottom: 2px solid #000;
+  border-bottom: var(--border-width-medium) solid var(--color-border-default);
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-dialog-header h2 {
-  color: #000;
+  color: var(--color-text-primary);
   text-transform: uppercase;
 }
 
@@ -172,42 +172,28 @@ body[data-theme="retro"][data-scheme="light"] .help-dialog-body {
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-close-btn {
-  color: #000;
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-close-btn:hover {
-  background-color: #fff;
-  color: #000;
+  background-color: var(--color-bg-input);
+  color: var(--color-text-primary);
 }
 
-/* Graph container with scanlines */
+/* Graph container */
 body[data-theme="retro"][data-scheme="light"] #graph-container {
-  background: #faf6e7;
+  background: var(--color-bg-graph);
   position: relative;
   image-rendering: pixelated;
 }
 
-body[data-theme="retro"][data-scheme="light"] #graph-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.04),
-    rgba(0, 0, 0, 0.04) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-}
-
 body[data-theme="retro"][data-scheme="light"] #zoom-controls button {
-  background: #fff;
-  border: 2px solid #000;
-  border-radius: 0;
-  color: #000;
-  box-shadow: none;
+  background: var(--color-zoom-bg);
+  border: var(--border-width-medium) solid var(--color-zoom-border);
+  border-radius: var(--radius-none);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-none);
   font-family: inherit;
 }
 
@@ -216,29 +202,29 @@ body[data-theme="retro"][data-scheme="light"] #zoom-controls button:active {
 }
 
 body[data-theme="retro"][data-scheme="light"] #zoom-controls button:hover {
-  background: #fffdf5;
+  background: var(--color-bg-hover);
 }
 
 /* Clear search button */
 body[data-theme="retro"][data-scheme="light"] .clear-search-btn {
-  color: #000;
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 body[data-theme="retro"][data-scheme="light"] .clear-search-btn:hover {
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="light"] .node-text {
-  fill: #000;
+  fill: var(--color-text-node);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="light"] .help-section code {
-  background-color: #fff;
-  border: 1px solid #000;
-  color: #000;
+  background-color: var(--color-bg-input);
+  border: var(--border-width-thin) solid var(--color-border-default);
+  color: var(--color-text-code);
   font-family: inherit;
   text-transform: none;
 }
@@ -246,50 +232,50 @@ body[data-theme="retro"][data-scheme="light"] .help-section code {
 /* ===== DARK SCHEME (CRT vibe on black) ===== */
 
 body[data-theme="retro"][data-scheme="dark"] {
-  background-color: #000;
-  color: #f7f3e8;
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar {
-  background: #0f0f0f;
-  border-right: 2px solid #f7f3e8;
-  box-shadow: none;
+  background: var(--color-bg-surface);
+  border-right: var(--border-width-medium) solid var(--color-border-default);
+  box-shadow: var(--shadow-none);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar h1,
 body[data-theme="retro"][data-scheme="dark"] .sidebar h2 {
-  color: #f7f3e8;
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar label {
-  color: #f7f3e8;
-  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar input[type="text"] {
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
-  background: #000;
-  color: #f7f3e8;
+  border: var(--border-width-medium) solid var(--color-border-input);
+  border-radius: var(--radius-none);
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar input[type="text"]:focus {
   outline: none;
-  box-shadow: inset 0 0 0 1px #f7f3e8;
+  box-shadow: var(--shadow-inset) var(--color-focus-ring-inset);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar button,
 body[data-theme="retro"][data-scheme="dark"] #show-all-btn,
 body[data-theme="retro"][data-scheme="dark"] #refresh-btn {
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
-  background: #000;
-  color: #f7f3e8;
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  background: var(--color-bg-button);
+  color: var(--color-text-primary);
   font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.4px;
+  font-size: var(--font-size-xs);
+  letter-spacing: var(--letter-spacing-wide);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .sidebar button:active,
@@ -301,103 +287,103 @@ body[data-theme="retro"][data-scheme="dark"] #refresh-btn:active {
 body[data-theme="retro"][data-scheme="dark"] .sidebar button:hover,
 body[data-theme="retro"][data-scheme="dark"] #show-all-btn:hover,
 body[data-theme="retro"][data-scheme="dark"] #refresh-btn:hover {
-  background: #1a1a1a;
-  box-shadow: none;
+  background: var(--color-bg-hover);
+  box-shadow: var(--shadow-none);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .controls {
-  border-top: 2px solid #f7f3e8;
+  border-top: var(--border-width-medium) solid var(--color-border-default);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .legend {
-  border-top: 2px solid #f7f3e8;
+  border-top: var(--border-width-medium) solid var(--color-border-default);
 }
 
 body[data-theme="retro"][data-scheme="dark"] input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 8px;
-  background: #000;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
+  height: var(--spacing-sm);
+  background: var(--color-range-track);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  background: #000;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  background: var(--color-range-thumb);
+  border: var(--border-width-medium) solid var(--color-range-thumb-border);
+  border-radius: var(--radius-none);
   cursor: pointer;
 }
 
 body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-moz-range-track {
-  height: 8px;
-  background: #000;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
+  height: var(--spacing-sm);
+  background: var(--color-range-track);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  background: #000;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
+  width: var(--icon-size-md);
+  height: var(--icon-size-md);
+  background: var(--color-range-thumb);
+  border: var(--border-width-medium) solid var(--color-range-thumb-border);
+  border-radius: var(--radius-none);
   cursor: pointer;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .results-list {
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
-  background-color: #000;
-  box-shadow: none;
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  background-color: var(--color-bg-input);
+  box-shadow: var(--shadow-none);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .results-list .result-item {
-  color: #f7f3e8;
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .results-list .result-item:hover,
 body[data-theme="retro"][data-scheme="dark"] .results-list .result-item.highlighted {
-  background-color: #1a1a1a;
+  background-color: var(--color-bg-hover);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .toggle-controls {
-  background: #0f0f0f;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
+  background: var(--color-bg-container);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .toggle-controls span {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .toggle-controls input[type="checkbox"] {
-  accent-color: #f7f3e8;
+  accent-color: var(--color-interactive-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-dialog {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: var(--color-bg-overlay);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-dialog-content {
-  background: #0f0f0f;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
-  box-shadow: none;
-  color: #f7f3e8;
+  background: var(--color-bg-surface);
+  border: var(--border-width-medium) solid var(--color-border-default);
+  border-radius: var(--radius-none);
+  box-shadow: var(--shadow-none);
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-dialog-header {
-  border-bottom: 2px solid #f7f3e8;
+  border-bottom: var(--border-width-medium) solid var(--color-border-default);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-dialog-header h2 {
-  color: #f7f3e8;
+  color: var(--color-text-primary);
   text-transform: uppercase;
 }
 
@@ -406,40 +392,26 @@ body[data-theme="retro"][data-scheme="dark"] .help-dialog-body {
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-close-btn {
-  color: #f7f3e8;
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-close-btn:hover {
-  background-color: #1a1a1a;
-  color: #f7f3e8;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 body[data-theme="retro"][data-scheme="dark"] #graph-container {
-  background: #000;
+  background: var(--color-bg-graph);
   position: relative;
 }
 
-body[data-theme="retro"][data-scheme="dark"] #graph-container::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(247, 243, 232, 0.06),
-    rgba(247, 243, 232, 0.06) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-}
-
 body[data-theme="retro"][data-scheme="dark"] #zoom-controls button {
-  background: #000;
-  border: 2px solid #f7f3e8;
-  border-radius: 0;
-  color: #f7f3e8;
-  box-shadow: none;
+  background: var(--color-zoom-bg);
+  border: var(--border-width-medium) solid var(--color-zoom-border);
+  border-radius: var(--radius-none);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-none);
   font-family: inherit;
 }
 
@@ -448,32 +420,32 @@ body[data-theme="retro"][data-scheme="dark"] #zoom-controls button:active {
 }
 
 body[data-theme="retro"][data-scheme="dark"] #zoom-controls button:hover {
-  background: #1a1a1a;
+  background: var(--color-bg-hover);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .clear-search-btn {
-  color: #f7f3e8;
+  color: var(--color-text-primary);
   font-family: inherit;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .clear-search-btn:hover {
-  color: #fff;
+  color: var(--color-interactive-hover);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .node-text {
-  fill: #f7f3e8;
+  fill: var(--color-text-node);
   font-family: inherit;
   text-transform: none;
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-section h3 {
-  color: #f7f3e8;
+  color: var(--color-text-help);
 }
 
 body[data-theme="retro"][data-scheme="dark"] .help-section code {
-  background-color: #000;
-  border: 1px solid #f7f3e8;
-  color: #f7f3e8;
+  background-color: var(--color-bg-input);
+  border: var(--border-width-thin) solid var(--color-border-default);
+  color: var(--color-text-code);
   font-family: inherit;
   text-transform: none;
 }
