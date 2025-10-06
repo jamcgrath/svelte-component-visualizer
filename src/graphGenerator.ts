@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 interface GraphNode {
     id: string;
     type: 'component' | 'route';
+    unused?: boolean;
 }
 
 interface GraphLink {
@@ -115,6 +116,8 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                 }
             } else {
                 // For non-renderer components, find components used in the template
+                const usedComponents = new Set<string>();
+
                 walk(ast.html as any, {
                     enter(node: any) {
                         if (
@@ -122,6 +125,7 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                             importedComponents[node.name]
                         ) {
                             const childName = importedComponents[node.name];
+                            usedComponents.add(node.name);
                             dependencyMap[nodeName].add(childName);
                             if (!allNodes.has(childName)) {
                                 allNodes.set(childName, { id: childName, type: 'component' });
@@ -129,6 +133,16 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                         }
                     }
                 });
+
+                // Add unused imported components
+                for (const [localName, childName] of Object.entries(importedComponents)) {
+                    if (!usedComponents.has(localName) && childName !== nodeName) {
+                        dependencyMap[nodeName].add(childName);
+                        if (!allNodes.has(childName)) {
+                            allNodes.set(childName, { id: childName, type: 'component', unused: true });
+                        }
+                    }
+                }
             }
         } catch (e) {
             console.error(`Could not parse ${file}: ${e instanceof Error ? e.message : String(e)}`);

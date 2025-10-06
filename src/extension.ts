@@ -345,6 +345,18 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
           ></div>
           <span>Route File</span>
         </div>
+        <div class="legend-item">
+          <div
+            class="legend-color"
+            style="background-color: #ffa500; border: 2px dashed #fff; opacity: 0.7"
+          ></div>
+          <span>Unused Import *</span>
+        </div>
+        <div style="margin-top: 10px; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #ffa500; font-size: 0.85em; line-height: 1.4;">
+          <strong>* Unused Imports:</strong> Components imported but not directly used in the template. These may be:<br>
+          • Safe to remove (cleanup)<br>
+          • Used dynamically (e.g., <code>&lt;svelte:component&gt;</code>)
+        </div>
       </div>
     </div>
     <div id="graph-container">

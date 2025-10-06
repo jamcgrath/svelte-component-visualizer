@@ -196,6 +196,11 @@ function updateGraph(selectedId) {
     .data(links)
     .enter()
     .append("line")
+    .attr("class", (d) => {
+      // Check if target node is unused
+      const targetNode = nodes.find(n => n.id === (d.target.id || d.target));
+      return targetNode && targetNode.unused ? "link--unused" : "";
+    })
     .attr("marker-end", "url(#arrow)");
 
   const node = graphGroup
@@ -209,6 +214,11 @@ function updateGraph(selectedId) {
       let classes = "node";
       if (d.type === 'route') {
           classes += " node--route";
+      }
+
+      // Add unused class if applicable
+      if (d.unused) {
+          classes += " node--unused";
       }
 
       if (!selectedId) {

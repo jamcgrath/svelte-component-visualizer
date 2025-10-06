@@ -198,6 +198,33 @@ svg {
   stroke: #fff;
   stroke-width: 1.5px;
 }
+.node--unused circle {
+  fill: #ffa500; /* Orange color for unused imports */
+  stroke: #fff;
+  stroke-dasharray: 4, 4;
+  stroke-width: 2px;
+  opacity: 0.7;
+}
+.node--unused.node--selected circle {
+  fill: #ff8c00; /* Darker orange for selected unused */
+  opacity: 0.9;
+}
+.node--unused.node--parent circle {
+  fill: #ff8c00; /* Darker orange for parent unused */
+  opacity: 0.8;
+}
+.node--unused.node--child circle {
+  fill: #ffb347; /* Lighter orange for child unused */
+  opacity: 0.8;
+}
+.node--unused text {
+  opacity: 0.7;
+  font-style: italic;
+}
+.links line.link--unused {
+  stroke-dasharray: 5, 5;
+  opacity: 0.4;
+}
 .legend {
   margin-top: 20px;
   padding-top: 10px;
