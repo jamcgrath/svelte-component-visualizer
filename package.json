@@ -65,6 +65,18 @@
           "type": "string",
           "default": "routes",
           "description": "Base path for routes (used for route naming). Will search for this directory name anywhere in the project."
+        },
+        "svelteVisualizer.theme": {
+          "type": "string",
+          "enum": ["flat", "modern", "retro"],
+          "default": "modern",
+          "description": "Visual theme for the component visualizer"
+        },
+        "svelteVisualizer.colorScheme": {
+          "type": "string",
+          "enum": ["auto", "light", "dark"],
+          "default": "auto",
+          "description": "Color scheme for the visualizer. 'auto' follows VS Code's theme"
         }
       }
     }

@@ -627,3 +627,25 @@ function drag(simulation) {
     .on("drag", dragged)
     .on("end", dragended);
 }
+
+// --- Theme Handling ---
+// Listen for theme changes from VS Code configuration
+window.addEventListener('message', event => {
+  const message = event.data;
+
+  if (message.command === 'updateTheme') {
+    applyTheme(message.theme, message.colorScheme);
+  }
+});
+
+function applyTheme(theme, colorScheme) {
+  document.body.setAttribute('data-theme', theme);
+  document.body.setAttribute('data-scheme', colorScheme);
+
+  // Update theme CSS link
+  const existingThemeLink = document.querySelector('link[data-theme-link]');
+  if (existingThemeLink) {
+    const newHref = existingThemeLink.href.replace(/\/themes\/\w+\.css/, `/themes/${theme}.css`);
+    existingThemeLink.href = newHref;
+  }
+}

@@ -1,0 +1,474 @@
+/* Retro Theme - Atari/Commodore-inspired, pixel vibe, monospace */
+
+body[data-theme="retro"] {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+/* Light scheme (default for retro - off-white paper) */
+body[data-theme="retro"][data-scheme="light"] {
+  background-color: #faf6e7;
+  color: #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar {
+  background: #f7f3e8;
+  border-right: 2px solid #000;
+  box-shadow: none;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar h1,
+body[data-theme="retro"][data-scheme="light"] .sidebar h2 {
+  color: #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar label {
+  color: #000;
+  font-size: 11px;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar input[type="text"] {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-family: inherit;
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar input[type="text"]:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar button,
+body[data-theme="retro"][data-scheme="light"] #show-all-btn,
+body[data-theme="retro"][data-scheme="light"] #refresh-btn {
+  border: 2px solid #000;
+  border-radius: 0;
+  background: #fff;
+  color: #000;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar button:active,
+body[data-theme="retro"][data-scheme="light"] #show-all-btn:active,
+body[data-theme="retro"][data-scheme="light"] #refresh-btn:active {
+  transform: translateY(1px);
+}
+
+body[data-theme="retro"][data-scheme="light"] .sidebar button:hover,
+body[data-theme="retro"][data-scheme="light"] #show-all-btn:hover,
+body[data-theme="retro"][data-scheme="light"] #refresh-btn:hover {
+  background: #fffdf5;
+  box-shadow: none;
+}
+
+body[data-theme="retro"][data-scheme="light"] .controls {
+  border-top: 2px solid #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .legend {
+  border-top: 2px solid #000;
+}
+
+/* Range inputs - square thumb, no radius rail */
+body[data-theme="retro"][data-scheme="light"] input[type="range"] {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+body[data-theme="retro"][data-scheme="light"] input[type="range"]::-webkit-slider-track {
+  height: 8px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="light"] input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+body[data-theme="retro"][data-scheme="light"] input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="light"] input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* Combobox dropdown */
+body[data-theme="retro"][data-scheme="light"] .results-list {
+  border: 2px solid #000;
+  border-radius: 0;
+  background-color: #fff;
+  box-shadow: none;
+  font-family: inherit;
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="light"] .results-list .result-item {
+  color: #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .results-list .result-item:hover,
+body[data-theme="retro"][data-scheme="light"] .results-list .result-item.highlighted {
+  background-color: #f7f3e8;
+}
+
+/* Toggle controls */
+body[data-theme="retro"][data-scheme="light"] .toggle-controls {
+  background: #f7f3e8;
+  border: 2px solid #000;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="light"] .toggle-controls span {
+  font-size: 11px;
+}
+
+body[data-theme="retro"][data-scheme="light"] .toggle-controls input[type="checkbox"] {
+  accent-color: #000;
+}
+
+/* Help dialog */
+body[data-theme="retro"][data-scheme="light"] .help-dialog {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-dialog-content {
+  background: #f7f3e8;
+  border: 2px solid #000;
+  border-radius: 0;
+  box-shadow: none;
+  color: #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-dialog-header {
+  border-bottom: 2px solid #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-dialog-header h2 {
+  color: #000;
+  text-transform: uppercase;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-dialog-body {
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-close-btn {
+  color: #000;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-close-btn:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+/* Graph container with scanlines */
+body[data-theme="retro"][data-scheme="light"] #graph-container {
+  background: #faf6e7;
+  position: relative;
+  image-rendering: pixelated;
+}
+
+body[data-theme="retro"][data-scheme="light"] #graph-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.04),
+    rgba(0, 0, 0, 0.04) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+body[data-theme="retro"][data-scheme="light"] #zoom-controls button {
+  background: #fff;
+  border: 2px solid #000;
+  border-radius: 0;
+  color: #000;
+  box-shadow: none;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="light"] #zoom-controls button:active {
+  transform: translateY(1px);
+}
+
+body[data-theme="retro"][data-scheme="light"] #zoom-controls button:hover {
+  background: #fffdf5;
+}
+
+/* Clear search button */
+body[data-theme="retro"][data-scheme="light"] .clear-search-btn {
+  color: #000;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="light"] .clear-search-btn:hover {
+  color: #000;
+}
+
+body[data-theme="retro"][data-scheme="light"] .node-text {
+  fill: #000;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="light"] .help-section code {
+  background-color: #fff;
+  border: 1px solid #000;
+  color: #000;
+  font-family: inherit;
+  text-transform: none;
+}
+
+/* ===== DARK SCHEME (CRT vibe on black) ===== */
+
+body[data-theme="retro"][data-scheme="dark"] {
+  background-color: #000;
+  color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar {
+  background: #0f0f0f;
+  border-right: 2px solid #f7f3e8;
+  box-shadow: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar h1,
+body[data-theme="retro"][data-scheme="dark"] .sidebar h2 {
+  color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar label {
+  color: #f7f3e8;
+  font-size: 11px;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar input[type="text"] {
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  background: #000;
+  color: #f7f3e8;
+  font-family: inherit;
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar input[type="text"]:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar button,
+body[data-theme="retro"][data-scheme="dark"] #show-all-btn,
+body[data-theme="retro"][data-scheme="dark"] #refresh-btn {
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  background: #000;
+  color: #f7f3e8;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar button:active,
+body[data-theme="retro"][data-scheme="dark"] #show-all-btn:active,
+body[data-theme="retro"][data-scheme="dark"] #refresh-btn:active {
+  transform: translateY(1px);
+}
+
+body[data-theme="retro"][data-scheme="dark"] .sidebar button:hover,
+body[data-theme="retro"][data-scheme="dark"] #show-all-btn:hover,
+body[data-theme="retro"][data-scheme="dark"] #refresh-btn:hover {
+  background: #1a1a1a;
+  box-shadow: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .controls {
+  border-top: 2px solid #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .legend {
+  border-top: 2px solid #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-webkit-slider-track {
+  height: 8px;
+  background: #000;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #000;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: #000;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="dark"] input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #000;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .results-list {
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  background-color: #000;
+  box-shadow: none;
+  font-family: inherit;
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .results-list .result-item {
+  color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .results-list .result-item:hover,
+body[data-theme="retro"][data-scheme="dark"] .results-list .result-item.highlighted {
+  background-color: #1a1a1a;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .toggle-controls {
+  background: #0f0f0f;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .toggle-controls span {
+  font-size: 11px;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .toggle-controls input[type="checkbox"] {
+  accent-color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-dialog {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-dialog-content {
+  background: #0f0f0f;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  box-shadow: none;
+  color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-dialog-header {
+  border-bottom: 2px solid #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-dialog-header h2 {
+  color: #f7f3e8;
+  text-transform: uppercase;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-dialog-body {
+  text-transform: none;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-close-btn {
+  color: #f7f3e8;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-close-btn:hover {
+  background-color: #1a1a1a;
+  color: #f7f3e8;
+}
+
+body[data-theme="retro"][data-scheme="dark"] #graph-container {
+  background: #000;
+  position: relative;
+}
+
+body[data-theme="retro"][data-scheme="dark"] #graph-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(247, 243, 232, 0.06),
+    rgba(247, 243, 232, 0.06) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+body[data-theme="retro"][data-scheme="dark"] #zoom-controls button {
+  background: #000;
+  border: 2px solid #f7f3e8;
+  border-radius: 0;
+  color: #f7f3e8;
+  box-shadow: none;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="dark"] #zoom-controls button:active {
+  transform: translateY(1px);
+}
+
+body[data-theme="retro"][data-scheme="dark"] #zoom-controls button:hover {
+  background: #1a1a1a;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .clear-search-btn {
+  color: #f7f3e8;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .clear-search-btn:hover {
+  color: #fff;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .node-text {
+  fill: #f7f3e8;
+  font-family: inherit;
+}
+
+body[data-theme="retro"][data-scheme="dark"] .help-section code {
+  background-color: #000;
+  border: 1px solid #f7f3e8;
+  color: #f7f3e8;
+  font-family: inherit;
+  text-transform: none;
+}

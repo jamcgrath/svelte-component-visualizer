@@ -7,6 +7,14 @@ let currentPanel: vscode.WebviewPanel | undefined;
 export function activate(context: vscode.ExtensionContext) {
     console.log('Svelte Component Visualizer is now active');
 
+    // Listen for configuration changes
+    vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('svelteVisualizer.theme') ||
+            e.affectsConfiguration('svelteVisualizer.colorScheme')) {
+            updateWebviewTheme();
+        }
+    });
+
     // Register command to show the visualizer
     const showGraphCommand = vscode.commands.registerCommand(
         'svelteVisualizer.showGraph',
@@ -210,6 +218,29 @@ async function focusDroppedFile(filePath: string, panel: vscode.WebviewPanel) {
     });
 }
 
+function updateWebviewTheme() {
+    if (!currentPanel) {
+        return;
+    }
+
+    const config = vscode.workspace.getConfiguration('svelteVisualizer');
+    const theme = config.get<string>('theme') || 'modern';
+    let colorScheme = config.get<string>('colorScheme') || 'auto';
+
+    // Detect VSCode theme if colorScheme is 'auto'
+    if (colorScheme === 'auto') {
+        const vscodeTheme = vscode.window.activeColorTheme.kind;
+        colorScheme = vscodeTheme === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+    }
+
+    // Send theme update to webview
+    currentPanel.webview.postMessage({
+        command: 'updateTheme',
+        theme: theme,
+        colorScheme: colorScheme
+    });
+}
+
 async function refreshGraph(context: vscode.ExtensionContext, panel: vscode.WebviewPanel) {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
@@ -301,6 +332,22 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         vscode.Uri.file(path.join(context.extensionPath, 'webview', 'script.js'))
     );
 
+    // Get theme configuration
+    const config = vscode.workspace.getConfiguration('svelteVisualizer');
+    const theme = config.get<string>('theme') || 'modern';
+    let colorScheme = config.get<string>('colorScheme') || 'auto';
+
+    // Detect VSCode theme if colorScheme is 'auto'
+    if (colorScheme === 'auto') {
+        const vscodeTheme = vscode.window.activeColorTheme.kind;
+        colorScheme = vscodeTheme === vscode.ColorThemeKind.Light ? 'light' : 'dark';
+    }
+
+    // Get theme CSS URI
+    const themeUri = webview.asWebviewUri(
+        vscode.Uri.file(path.join(context.extensionPath, 'webview', 'themes', `${theme}.css`))
+    );
+
     return `<!doctype html>
 <html lang="en">
   <head>
@@ -309,8 +356,9 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https:;">
     <title>Component Dependency Graph</title>
     <link rel="stylesheet" href="${styleUri}" />
+    <link rel="stylesheet" href="${themeUri}" data-theme-link />
   </head>
-  <body>
+  <body data-theme="${theme}" data-scheme="${colorScheme}">
     <div class="sidebar">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h1 style="margin: 0;">Component Visualizer</h1>

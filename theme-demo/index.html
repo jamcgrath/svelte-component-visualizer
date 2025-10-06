@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Svelte Component Visualizer — Three Light-Theme UI Designs (HTML mocks)</title>
+  <style>
+    /* Light + Dark mix per design; preserve your existing IA & controls from the screenshot. */
+
+    /* Role tokens (shared) */
+    :root{
+      --sel:#ff914d; /* Selected */
+      --par:#4da3ff; /* Parent */
+      --chi:#43c463; /* Child */
+      --route:#9a6bff; /* Route */
+    }
+
+    html,body{margin:0;padding:0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;background:#fff}
+    .wrap{max-width:1320px;margin:0 auto;padding:24px}
+    h1{font-size:18px;margin:0 0 12px}
+    h2{font-size:16px;margin:28px 0 12px}
+    .hint{color:#666;font-size:12px;margin:6px 0 16px}
+
+    /* SHAPES */
+    .node{position:absolute;width:20px;height:20px}
+    .shape-circle{border-radius:50%}
+    .shape-roundrect{border-radius:6px}
+    .shape-diamond{transform:rotate(45deg)}
+    .shape-hex{clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+
+    .legend{display:flex;flex-direction:column;gap:8px}
+    .leg-item{display:flex;align-items:center;gap:10px;font-size:13px}
+    .leg-shape{width:16px;height:16px;display:inline-block}
+
+    /* LAYOUT (shared) */
+    .ui{display:grid;grid-template-columns:300px 1fr;gap:var(--col-gap,16px);width:100%;max-width:1280px;margin:0 auto 48px} 
+    .left{padding:14px}
+    .sec{padding:12px}
+    .field{display:grid;gap:6px;margin-bottom:10px}
+    label{font-size:12px}
+    .input{width:100%;padding:9px 10px;border-radius:8px}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+    .range{width:100%}
+    .canvas{position:relative;overflow:hidden}
+
+    /* Top-right nav cluster (visual only, completed 3x3 pad) */
+    .navpad{position:absolute;right:12px;top:12px;display:grid;gap:10px;align-items:start}
+    .navpad .stack{display:grid;gap:6px}
+    .navbtn{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;font-weight:700}
+    .pad{display:grid;grid-template-columns:repeat(3,34px);grid-template-rows:repeat(3,34px);gap:6px}
+
+    /* ---------------- FLAT (Ableton-like, dark gray, no cards, 2px strokes, slider rail 4px line) ---------------- */
+    .ui.flat{gap:0}
+    .flat .left{background:#2b2b2b;color:#e9e9e9;border:2px solid #515151;padding:12px}
+    .flat .sec{background:transparent;border:none;border-bottom:2px solid #4a4a4a;border-radius:0;padding:12px 0}
+    .flat .sec:last-child{border-bottom:none}
+    .flat label,.flat .sec h3{color:#d4d4d4}
+    .flat .input{border:2px solid #515151;border-radius:2px;background:#1f1f1f;color:#f2f2f2}
+    .flat .btn{border:2px solid #515151;background:#2b2b2b;color:#f2f2f2;border-radius:2px}
+    .flat .btn:hover,.flat .navbtn:hover{background:#303030}
+    .flat .canvas{background:#2b2b2b;border:2px solid #515151;border-radius:2px}
+    .flat .navbtn{border:2px solid #515151;background:#2b2b2b;color:#f0f0f0;border-radius:2px;box-shadow:none}
+    .flat .pad{gap:6px}
+    .flat .node{box-shadow:none;outline:none}
+
+    /* Flat sliders = 4px line, square thumb */
+    .flat input[type="range"]{ -webkit-appearance:none; height:4px; background:#7a7a7a; border:none; border-radius:0 }
+    .flat input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; background:#2b2b2b; border:2px solid #f0f0f0; border-radius:0 }
+    .flat input[type="range"]::-moz-range-track{ height:4px; background:#7a7a7a; border:none; }
+    .flat input[type="range"]::-moz-range-thumb{ width:16px; height:16px; background:#2b2b2b; border:2px solid #f0f0f0; border-radius:0 }
+
+    /* ---------------- MODERN (rounded, soft shadows, gradients, glassy navpad) ---------------- */
+    .modern .left{background:#ffffff;border:1px solid #e9ecf7;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.05)}
+    .modern .sec{background:linear-gradient(180deg,#fff 0%,#f9faff 100%);border:1px solid #e6e9f6;border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:14px}
+    .modern label{color:#5a5d78}
+    .modern .input{border:1px solid #dfe3f8;background:#fff;color:#111;border-radius:12px}
+    .modern .input:focus{outline:3px solid #e9edff}
+    .modern .btn{border:1px solid #dfe3f8;background:linear-gradient(180deg,#fff,#f4f6ff);color:#1b1e3a;border-radius:12px}
+    .modern .btn:hover{box-shadow:0 8px 16px rgba(0,0,0,.08)}
+    .modern .canvas{background:linear-gradient(180deg,#ffffff 0%, #f3f3f3 100%);border:1px solid #e6e9f6;border-radius:16px;box-shadow:0 22px 44px rgba(0,0,0,.07)}
+    .modern .navbtn{border:1px solid #dfe3f8;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);color:#1b1e3a;border-radius:10px}
+    .modern .navbtn:hover{box-shadow:0 6px 14px rgba(0,0,0,.1)}
+    .modern .navpad{gap:12px}
+    .modern .node{border:1px solid rgba(17,24,39,.15);box-shadow:0 8px 18px rgba(0,0,0,.12);background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.6), rgba(255,255,255,0) 60%)}
+
+    /* ---------------- RETRO (Atari/Commodore-inspired: pixel vibe, black 2px strokes, off‑white paper) ---------------- */
+    .retro{font-family:ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing:.4px; text-transform:uppercase}
+    .retro .left{background:#f7f3e8;border:2px solid #000;border-radius:0;padding:10px}
+    .retro .sec{background:#f7f3e8;border:2px solid #000;border-radius:0;padding:10px;margin-bottom:8px}
+    .retro label{color:#000}
+    .retro .input{border:2px solid #000;border-radius:0;background:#fff;color:#111}
+    .retro .btn{border:2px solid #000;border-radius:0;background:#fff;color:#000}
+    .retro .btn:active{transform:translateY(1px)}
+    .retro .canvas{background:#faf6e7;border:2px solid #000;border-radius:0;position:relative;image-rendering:pixelated}
+    .retro .canvas::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient( to bottom, rgba(0,0,0,.04), rgba(0,0,0,.04) 1px, transparent 1px, transparent 3px)}
+    .retro .navbtn{border:2px solid #000;border-radius:0;background:#fff;color:#000}
+    .retro .pad{gap:4px}
+    .retro .node{outline:2px solid #000;box-shadow:none;background:none}
+    /* Retro sliders = square thumb, no radius rail */
+    .retro input[type="range"]{ -webkit-appearance:none; height:8px; background:#fff; border:2px solid #000; border-radius:0 }
+    .retro input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; background:#fff; border:2px solid #000; border-radius:0 }
+    .retro input[type="range"]::-moz-range-track{ height:8px; background:#fff; border:2px solid #000; border-radius:0 }
+    .retro input[type="range"]::-moz-range-thumb{ width:14px; height:14px; background:#fff; border:2px solid #000; border-radius:0 }
+
+    /* Role fills */
+    .c-sel{background:var(--sel)}
+    .c-par{background:var(--par)}
+    .c-chi{background:var(--chi)}
+    .c-route{background:var(--route)}
+  /* ---------- ADDITIONAL THEME VARIANTS ---------- */
+
+    /* Flat Light — lines use dark gray from flat dark background (#2b2b2b) */
+    .flat.light .left{background:#ffffff;color:#111;border:2px solid #2b2b2b;padding:12px}
+    .flat.light .sec{background:transparent;border:none;border-bottom:2px solid #2b2b2b;border-radius:0;padding:12px 0}
+    .flat.light .sec:last-child{border-bottom:none}
+    .flat.light label,.flat.light .sec h3{color:#111}
+    .flat.light .input{border:2px solid #2b2b2b;border-radius:2px;background:#fff;color:#111}
+    .flat.light .btn{border:2px solid #2b2b2b;background:#fff;color:#111;border-radius:2px}
+    .flat.light .btn:hover,.flat.light .navbtn:hover{background:#f2f2f2}
+    .flat.light .canvas{background:#ffffff;border:2px solid #2b2b2b;border-radius:2px}
+    .flat.light .navbtn{border:2px solid #2b2b2b;background:#fff;color:#222;border-radius:2px;box-shadow:none}
+    .flat.light input[type="range"]{ -webkit-appearance:none; height:4px; background:#2b2b2b; border:none; border-radius:0 }
+    .flat.light input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; background:#ffffff; border:2px solid #2b2b2b; border-radius:0 }
+    .flat.light input[type="range"]::-moz-range-track{ height:4px; background:#2b2b2b; border:none; }
+    .flat.light input[type="range"]::-moz-range-thumb{ width:16px; height:16px; background:#ffffff; border:2px solid #2b2b2b; border-radius:0 }
+
+    /* Modern Dark */
+    .modern.dark{color:#e7e9ee}
+    .modern.dark .left{background:#14161e;border:1px solid #23283a;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+    .modern.dark .sec{background:linear-gradient(180deg,#171a24 0%,#12141c 100%);border:1px solid #23283a;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.45);padding:14px}
+    .modern.dark label{color:#c6c9d8}
+    .modern.dark .input{border:1px solid #2a2f44;background:#0f1118;color:#e7e9ee;border-radius:12px}
+    .modern.dark .input:focus{outline:3px solid #293158}
+    .modern.dark .btn{border:1px solid #2a2f44;background:linear-gradient(180deg,#1a1d2a,#141826);color:#e7e9ee;border-radius:12px}
+    .modern.dark .btn:hover{box-shadow:0 8px 16px rgba(0,0,0,.6)}
+    .modern.dark .canvas{background:radial-gradient(1000px 480px at 42% 24%,#181b28 0%,#10131d 60%,#0b0e17 100%);border:1px solid #23283a;border-radius:16px;box-shadow:0 22px 44px rgba(0,0,0,.6)}
+    .modern.dark .navbtn{border:1px solid #2a2f44;background:rgba(18,20,28,.65);backdrop-filter:blur(10px);color:#e7e9ee;border-radius:10px}
+    .modern.dark .node{border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 22px rgba(0,0,0,.65);background:radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), rgba(255,255,255,0) 60%)}
+
+    /* Retro Dark (CRT vibe on black) */
+    .retro.dark{color:#f7f3e8}
+    .retro.dark .left{background:#0f0f0f;border:2px solid #f7f3e8;border-radius:0;padding:10px}
+    .retro.dark .sec{background:#0f0f0f;border:2px solid #f7f3e8;border-radius:0;padding:10px;margin-bottom:8px}
+    .retro.dark label{color:#f7f3e8}
+    .retro.dark .input{border:2px solid #f7f3e8;border-radius:0;background:#000;color:#f7f3e8}
+    .retro.dark .btn{border:2px solid #f7f3e8;border-radius:0;background:#000;color:#f7f3e8}
+    .retro.dark .canvas{background:#000;border:2px solid #f7f3e8;border-radius:0;position:relative}
+    .retro.dark .canvas::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient( to bottom, rgba(247,243,232,.06), rgba(247,243,232,.06) 1px, transparent 1px, transparent 3px)}
+    .retro.dark .navbtn{border:2px solid #f7f3e8;border-radius:0;background:#000;color:#f7f3e8}
+    .retro.dark .node{outline:2px solid #f7f3e8;box-shadow:none;background:none}
+    .retro.dark input[type="range"]{ -webkit-appearance:none; height:8px; background:#000; border:2px solid #f7f3e8; border-radius:0 }
+    .retro.dark input[type="range"]::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; background:#000; border:2px solid #f7f3e8; border-radius:0 }
+    .retro.dark input[type="range"]::-moz-range-track{ height:8px; background:#000; border:2px solid #f7f3e8; border-radius:0 }
+    .retro.dark input[type="range"]::-moz-range-thumb{ width:14px; height:14px; background:#000; border:2px solid #f7f3e8; border-radius:0 }
+.ui.retro{gap:0}
+*{box-sizing:border-box}
+.left,.canvas{min-width:0}
+
+.ui.flat{--col-gap:0}
+.ui.retro{--col-gap:0}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Svelte Component Visualizer — Light UI mocks (Flat, Modern, Retro)</h1>
+    <p class="hint">These preserve your current layout from the screenshot: a left control rail with Find, Graph Controls, and Legend, and a canvas with the top-right nav buttons. Only node <em>shapes</em> are shown; no connecting lines. Legend uses the exact same shapes.</p>
+
+    <!-- ====================== FLAT UI ====================== -->
+    <h2>1) Flat UI</h2>
+    <div class="ui flat" role="region" aria-label="Flat UI mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="f1-comp">Search &amp; Select Component</label>
+            <input id="f1-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="f1-route">Search &amp; Select Route</label>
+            <input id="f1-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="f1-link">Link Distance</label>
+            <input id="f1-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="f1-charge">Charge Strength</label>
+            <input id="f1-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <!-- top-right nav buttons (visual only, as in your screenshot) -->
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad" aria-label="pan pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+
+        <!-- Only node shapes -->
+        <div class="node shape-roundrect c-sel" style="left:48%;top:52%" title="Alert (selected)"></div>
+        <div class="node shape-diamond c-par" style="left:36%;top:49%" title="Parent"></div>
+        <div class="node shape-circle c-chi" style="left:61%;top:47%" title="Child"></div>
+        <div class="node shape-circle c-chi" style="left:54%;top:38%" title="Child"></div>
+        <div class="node shape-circle c-chi" style="left:52%;top:66%" title="Child"></div>
+        <div class="node shape-hex c-route" style="left:70%;top:62%" title="Route file"></div>
+      </section>
+    </div>
+
+    <!-- ====================== MODERN UI ====================== -->
+    <h2>2) Modern UI</h2>
+    <div class="ui modern" role="region" aria-label="Modern UI mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="m1-comp">Search &amp; Select Component</label>
+            <input id="m1-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="m1-route">Search &amp; Select Route</label>
+            <input id="m1-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="m1-link">Link Distance</label>
+            <input id="m1-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="m1-charge">Charge Strength</label>
+            <input id="m1-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+
+        <!-- Nodes (soft shadows, glossy) -->
+        <div class="node shape-roundrect c-sel" style="left:47%;top:52%"></div>
+        <div class="node shape-diamond c-par" style="left:35%;top:49%"></div>
+        <div class="node shape-circle c-chi" style="left:60%;top:46%"></div>
+        <div class="node shape-circle c-chi" style="left:53%;top:36%"></div>
+        <div class="node shape-circle c-chi" style="left:51%;top:66%"></div>
+        <div class="node shape-hex c-route" style="left:68%;top:61%"></div>
+      </section>
+    </div>
+
+    <!-- ====================== RETRO UI ====================== -->
+    <h2>3) Retro UI</h2>
+    <div class="ui retro" role="region" aria-label="Retro UI mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="r1-comp">Search &amp; Select Component</label>
+            <input id="r1-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="r1-route">Search &amp; Select Route</label>
+            <input id="r1-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="r1-link">Link Distance</label>
+            <input id="r1-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="r1-charge">Charge Strength</label>
+            <input id="r1-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+
+        <!-- Nodes with crisp outlines -->
+        <div class="node shape-roundrect c-sel" style="left:48%;top:52%"></div>
+        <div class="node shape-diamond c-par" style="left:36%;top:49%"></div>
+        <div class="node shape-circle c-chi" style="left:61%;top:47%"></div>
+        <div class="node shape-circle c-chi" style="left:54%;top:38%"></div>
+        <div class="node shape-circle c-chi" style="left:52%;top:66%"></div>
+        <div class="node shape-hex c-route" style="left:70%;top:62%"></div>
+      </section>
+    </div>
+  </div>
+  <div class="wrap">
+    <!-- ====================== FLAT LIGHT (same flat layout, white bg, lines = dark gray from flat dark) ====================== -->
+    <h2>Flat UI — Light Theme</h2>
+    <div class="ui flat light" role="region" aria-label="Flat UI Light mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="fl-comp">Search &amp; Select Component</label>
+            <input id="fl-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="fl-route">Search &amp; Select Route</label>
+            <input id="fl-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="fl-link">Link Distance</label>
+            <input id="fl-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="fl-charge">Charge Strength</label>
+            <input id="fl-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad" aria-label="pan pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+        <div class="node shape-roundrect c-sel" style="left:48%;top:52%"></div>
+        <div class="node shape-diamond c-par" style="left:36%;top:49%"></div>
+        <div class="node shape-circle c-chi" style="left:61%;top:47%"></div>
+        <div class="node shape-circle c-chi" style="left:54%;top:38%"></div>
+        <div class="node shape-circle c-chi" style="left:52%;top:66%"></div>
+        <div class="node shape-hex c-route" style="left:70%;top:62%"></div>
+      </section>
+    </div>
+
+    <!-- ====================== MODERN DARK ====================== -->
+    <h2>Modern UI — Dark Theme</h2>
+    <div class="ui modern dark" role="region" aria-label="Modern UI Dark mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="md-comp">Search &amp; Select Component</label>
+            <input id="md-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="md-route">Search &amp; Select Route</label>
+            <input id="md-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="md-link">Link Distance</label>
+            <input id="md-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="md-charge">Charge Strength</label>
+            <input id="md-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+        <div class="node shape-roundrect c-sel" style="left:47%;top:52%"></div>
+        <div class="node shape-diamond c-par" style="left:35%;top:49%"></div>
+        <div class="node shape-circle c-chi" style="left:60%;top:46%"></div>
+        <div class="node shape-circle c-chi" style="left:53%;top:36%"></div>
+        <div class="node shape-circle c-chi" style="left:51%;top:66%"></div>
+        <div class="node shape-hex c-route" style="left:68%;top:61%"></div>
+      </section>
+    </div>
+
+    <!-- ====================== RETRO DARK ====================== -->
+    <h2>Retro UI — Dark Theme</h2>
+    <div class="ui retro dark" role="region" aria-label="Retro UI Dark mock">
+      <aside class="left">
+        <div class="sec">
+          <h3>Find</h3>
+          <div class="field">
+            <label for="rd-comp">Search &amp; Select Component</label>
+            <input id="rd-comp" class="input" placeholder="Alert" />
+          </div>
+          <div class="field">
+            <label for="rd-route">Search &amp; Select Route</label>
+            <input id="rd-route" class="input" placeholder="Type to search routes…" />
+          </div>
+          <div class="row">
+            <button class="btn">Show All Components</button>
+            <button class="btn">Refresh Graph</button>
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Graph Controls</h3>
+          <div class="field">
+            <label for="rd-link">Link Distance</label>
+            <input id="rd-link" class="range" type="range" min="50" max="400" value="200" />
+          </div>
+          <div class="field">
+            <label for="rd-charge">Charge Strength</label>
+            <input id="rd-charge" class="range" type="range" min="-800" max="200" value="-400" />
+          </div>
+        </div>
+        <div class="sec">
+          <h3>Legend</h3>
+          <div class="legend">
+            <div class="leg-item"><span class="leg-shape shape-roundrect c-sel"></span> Selected</div>
+            <div class="leg-item"><span class="leg-shape shape-diamond c-par"></span> Parent (Uses Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-circle c-chi"></span> Child (Used by Selected)</div>
+            <div class="leg-item"><span class="leg-shape shape-hex c-route"></span> Route File</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="canvas" aria-label="Canvas">
+        <div class="navpad" aria-hidden="true">
+          <div class="stack">
+            <button class="navbtn" title="Zoom in">+</button>
+            <button class="navbtn" title="Zoom out">−</button>
+          </div>
+          <div class="pad">
+            <button class="navbtn" title="Pan up">↑</button>
+            <button class="navbtn" title="Reset">○</button>
+            <button class="navbtn" title="Pan right">→</button>
+            <button class="navbtn" title="Pan left">←</button>
+            <button class="navbtn" title="Center">•</button>
+            <button class="navbtn" title="Pan right (alt)">→</button>
+            <button class="navbtn" title="Pan left (alt)">←</button>
+            <button class="navbtn" title="Pan down">↓</button>
+            <button class="navbtn" title="Fit">□</button>
+          </div>
+        </div>
+        <div class="node shape-roundrect c-sel" style="left:48%;top:52%"></div>
+        <div class="node shape-diamond c-par" style="left:36%;top:49%"></div>
+        <div class="node shape-circle c-chi" style="left:61%;top:47%"></div>
+        <div class="node shape-circle c-chi" style="left:54%;top:38%"></div>
+        <div class="node shape-circle c-chi" style="left:52%;top:66%"></div>
+        <div class="node shape-hex c-route" style="left:70%;top:62%"></div>
+      </section>
+    </div>
+
+</div><!-- /.wrap -->
+</body>
+</html>

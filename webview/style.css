@@ -1,31 +1,31 @@
+/* Base structural styles - theme-independent layout and sizing */
+
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
     Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   margin: 0;
   overflow: hidden;
-  background-color: #f4f4f4;
   display: flex;
 }
+
 .sidebar {
   width: 250px;
-  background-color: #fff;
   padding: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   height: 100vh;
   overflow-y: auto;
   z-index: 10;
 }
+
 .sidebar h1 {
   font-size: 1.2em;
   margin-top: 0;
 }
+
 .sidebar input[type="text"] {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
-  border: 1px solid #767676;
-  border-radius: 4px;
 }
 .label-wrapper {
   display: flex;
@@ -33,77 +33,74 @@ body {
   align-items: center;
   margin-bottom: 5px;
 }
+
 .combobox-container {
   position: relative;
   margin-bottom: 15px;
 }
+
 .results-list {
   position: absolute;
   width: 100%;
-  border: 1px solid #ccc;
-  background-color: white;
   max-height: 300px;
   overflow-y: auto;
   z-index: 100;
   display: none; /* Initially hidden */
   box-sizing: border-box;
 }
+
 .results-list .result-item {
   padding: 8px;
   cursor: pointer;
 }
-.results-list .result-item:hover,
-.results-list .result-item.highlighted {
-  background-color: #f0f0f0;
-}
+
 .clear-search-btn {
   background: none;
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #999;
   display: none; /* Initially hidden */
   padding: 0;
   line-height: 1;
 }
 .controls {
   margin-top: 20px;
-  border-top: 1px solid #eee;
   padding-top: 10px;
 }
+
 .controls h2 {
   font-size: 1em;
   margin-top: 0;
 }
+
 .controls div {
   margin-bottom: 10px;
 }
+
 .controls label {
   display: block;
   font-size: 0.9em;
   margin-bottom: 5px;
 }
+
 .controls input[type="range"] {
   width: 100%;
 }
-#show-all-btn {
+
+#show-all-btn,
+#refresh-btn {
   width: 100%;
   padding: 10px;
-  background-color: #6b7280;
-  color: white;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
   margin-top: 10px;
-}
-#show-all-btn:hover {
-  background-color: #4b5563;
 }
 #graph-container {
   flex-grow: 1;
   height: 100vh;
   position: relative; /* For positioning zoom controls */
 }
+
 #zoom-controls {
   position: absolute;
   top: 20px;
@@ -138,89 +135,97 @@ body {
   grid-area: down;
 }
 #zoom-controls button {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   width: 32px;
   height: 32px;
   cursor: pointer;
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-#zoom-controls button:hover {
-  background-color: #f0f0f0;
 }
 svg {
   width: 100%;
   height: 100%;
 }
+
 .links line {
   stroke: #999;
   stroke-opacity: 0.6;
 }
+
 .nodes circle {
   stroke: #fff;
   stroke-width: 1.5px;
 }
+
 .node-text {
   font-size: 12px;
   pointer-events: none;
-  fill: #333;
 }
-.node--selected circle,
-.node--selected rect {
-  fill: #ff6347; /* Tomato color for selected node */
-}
+/* Node state classes - colors defined in themes */
 .node--selected circle {
   r: 10px;
 }
+
 .node--selected rect {
   width: 20px;
   height: 20px;
   x: -10px;
   y: -10px;
 }
+
+.node--selected circle,
+.node--selected rect {
+  fill: #ff6347; /* Default tomato - overridden by themes */
+}
+
 .node--parent circle,
 .node--parent rect {
-  fill: #4682b4; /* SteelBlue for parents */
+  fill: #4682b4; /* Default steel blue - overridden by themes */
 }
+
 .node--child circle,
 .node--child rect {
-  fill: #32cd32; /* LimeGreen for children */
+  fill: #32cd32; /* Default lime green - overridden by themes */
 }
+
 .node--default circle {
-  fill: #3182bd;
+  fill: #3182bd; /* Default blue - overridden by themes */
 }
+
 .node--route rect {
-  fill: #9b59b6; /* Amethyst color for routes */
+  fill: #9b59b6; /* Default amethyst - overridden by themes */
   stroke: #fff;
   stroke-width: 1.5px;
 }
+
 .node--unused circle {
-  fill: #ffa500; /* Orange color for unused imports */
+  fill: #ffa500; /* Default orange - overridden by themes */
   stroke: #fff;
   stroke-dasharray: 4, 4;
   stroke-width: 2px;
   opacity: 0.7;
 }
+
 .node--unused.node--selected circle {
-  fill: #ff8c00; /* Darker orange for selected unused */
+  fill: #ff8c00;
   opacity: 0.9;
 }
+
 .node--unused.node--parent circle {
-  fill: #ff8c00; /* Darker orange for parent unused */
+  fill: #ff8c00;
   opacity: 0.8;
 }
+
 .node--unused.node--child circle {
-  fill: #ffb347; /* Lighter orange for child unused */
+  fill: #ffb347;
   opacity: 0.8;
 }
+
 .node--unused text {
   opacity: 0.7;
   font-style: italic;
 }
+
 .links line.link--unused {
   stroke-dasharray: 5, 5;
   opacity: 0.4;
@@ -228,30 +233,29 @@ svg {
 .legend {
   margin-top: 20px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
 }
+
 .legend h2 {
   font-size: 1em;
   margin-top: 0;
 }
+
 .legend-item {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
 }
+
 .legend-color {
   width: 12px;
   height: 12px;
   border-radius: 50%;
   margin-right: 8px;
-  border: 1px solid #ccc;
 }
+
 .toggle-controls {
   margin-top: 15px;
   padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  border: 1px solid #e0e0e0;
 }
 .toggle-controls label {
   display: flex;
@@ -259,12 +263,14 @@ svg {
   cursor: pointer;
   font-size: 0.9em;
 }
+
 .toggle-controls input[type="checkbox"] {
   margin-right: 8px;
   cursor: pointer;
   width: 16px;
   height: 16px;
 }
+
 .toggle-controls span {
   user-select: none;
 }
@@ -289,7 +295,6 @@ svg {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -297,9 +302,6 @@ svg {
 }
 
 .help-dialog-content {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   max-width: 600px;
   max-height: 80vh;
   width: 90%;
@@ -312,13 +314,11 @@ svg {
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #eee;
 }
 
 .help-dialog-header h2 {
   margin: 0;
   font-size: 1.5em;
-  color: #333;
 }
 
 .help-close-btn {
@@ -326,7 +326,6 @@ svg {
   border: none;
   font-size: 32px;
   cursor: pointer;
-  color: #999;
   width: 32px;
   height: 32px;
   display: flex;
@@ -334,12 +333,6 @@ svg {
   justify-content: center;
   line-height: 1;
   padding: 0;
-  border-radius: 4px;
-}
-
-.help-close-btn:hover {
-  background-color: #f0f0f0;
-  color: #333;
 }
 
 .help-dialog-body {
@@ -379,15 +372,7 @@ svg {
 }
 
 .help-section code {
-  background-color: #f4f4f4;
   padding: 2px 6px;
-  border-radius: 3px;
   font-family: "Courier New", monospace;
   font-size: 0.9em;
-}
-
-#help-btn:hover {
-  background-color: #f0f0f0;
-  border-color: #4b5563;
-  color: #4b5563;
 }
