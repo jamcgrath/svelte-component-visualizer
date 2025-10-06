@@ -289,6 +289,33 @@ function updateGraph(selectedId) {
   });
 }
 
+// --- Help Dialog ---
+const helpBtn = d3.select("#help-btn");
+const helpDialog = d3.select("#help-dialog");
+const helpCloseBtn = d3.select("#help-close-btn");
+
+helpBtn.on("click", () => {
+  helpDialog.style("display", "flex");
+});
+
+helpCloseBtn.on("click", () => {
+  helpDialog.style("display", "none");
+});
+
+// Close help dialog when clicking outside the content
+helpDialog.on("click", (event) => {
+  if (event.target.id === "help-dialog") {
+    helpDialog.style("display", "none");
+  }
+});
+
+// Close help dialog with Escape key
+d3.select("body").on("keydown.help", (event) => {
+  if (event.key === "Escape" && helpDialog.style("display") === "flex") {
+    helpDialog.style("display", "none");
+  }
+});
+
 // --- Event Listeners ---
 const showAllBtn = d3.select("#show-all-btn");
 const refreshBtn = d3.select("#refresh-btn");

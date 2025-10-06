@@ -254,7 +254,10 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
   </head>
   <body>
     <div class="sidebar">
-      <h1>Component Visualizer</h1>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h1 style="margin: 0;">Component Visualizer</h1>
+        <button id="help-btn" title="Help & Instructions" style="background: none; border: 2px solid #6b7280; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; font-weight: bold; color: #6b7280; display: flex; align-items: center; justify-content: center;">?</button>
+      </div>
       <div class="label-wrapper">
         <label for="search-input">Search & Select Component</label>
         <button
@@ -350,14 +353,61 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
             class="legend-color"
             style="background-color: #ffa500; border: 2px dashed #fff; opacity: 0.7"
           ></div>
-          <span>Unused Import *</span>
-        </div>
-        <div style="margin-top: 10px; padding: 8px; background-color: #f9f9f9; border-left: 3px solid #ffa500; font-size: 0.85em; line-height: 1.4;">
-          <strong>* Unused Imports:</strong> Components imported but not directly used in the template. These may be:<br>
-          • Safe to remove (cleanup)<br>
-          • Used dynamically (e.g., <code>&lt;svelte:component&gt;</code>)
+          <span>Unused Import</span>
         </div>
       </div>
+    </div>
+
+    <!-- Help Dialog -->
+    <div id="help-dialog" class="help-dialog" style="display: none;">
+      <div class="help-dialog-content">
+        <div class="help-dialog-header">
+          <h2>How to Use Component Visualizer</h2>
+          <button id="help-close-btn" class="help-close-btn">&times;</button>
+        </div>
+        <div class="help-dialog-body">
+          <section class="help-section">
+            <h3>🖱️ Interacting with Nodes</h3>
+            <ul>
+              <li><strong>Single Click:</strong> Select and drag nodes to reposition them</li>
+              <li><strong>Cmd/Ctrl + Click:</strong> Focus on a node in the visualizer (shows only connected components)</li>
+              <li><strong>Double Click:</strong> Open the component file in VS Code editor</li>
+            </ul>
+          </section>
+
+          <section class="help-section">
+            <h3>🎨 Node Colors & Types</h3>
+            <ul>
+              <li><strong style="color: #ff6347;">Red:</strong> Currently selected component</li>
+              <li><strong style="color: #4682b4;">Blue:</strong> Parent (uses the selected component)</li>
+              <li><strong style="color: #32cd32;">Green:</strong> Child (used by the selected component)</li>
+              <li><strong style="color: #9b59b6;">Purple Square:</strong> Route file (+page, +layout, +error)</li>
+              <li><strong style="color: #ffa500;">Orange (dashed):</strong> Unused import</li>
+            </ul>
+          </section>
+
+          <section class="help-section">
+            <h3>⚠️ Unused Imports</h3>
+            <p>Components shown with <strong>orange color and dashed borders</strong> are imported but not directly referenced in the template.</p>
+            <p><strong>These may be:</strong></p>
+            <ul>
+              <li>✅ <strong>Safe to remove</strong> - Cleanup opportunity for unused code</li>
+              <li>⚡ <strong>Used dynamically</strong> - Referenced via <code>&lt;svelte:component&gt;</code>, JavaScript logic, or dynamic imports</li>
+            </ul>
+            <p style="font-style: italic; color: #666; font-size: 0.9em;">Always verify before removing to ensure they're not used dynamically!</p>
+          </section>
+
+          <section class="help-section">
+            <h3>🔍 Search & Filter</h3>
+            <ul>
+              <li>Use the search boxes to find and focus on specific components or routes</li>
+              <li>Click "Show All Components" to view the complete graph</li>
+              <li>Use "Refresh Graph" to reload after making file changes</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
     </div>
     <div id="graph-container">
       <div id="zoom-controls">
