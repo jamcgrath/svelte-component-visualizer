@@ -8,6 +8,8 @@ const height = graphContainer.clientHeight;
 let fullGraphData;
 let simulation;
 let sortedComponents, sortedRoutes;
+let showUnusedImports = true;
+let currentSelectedId = null; // Track current selection for re-rendering
 
 // --- UI Elements ---
 const searchInput = d3.select("#search-input");
@@ -132,6 +134,9 @@ function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
 function updateGraph(selectedId) {
   svg.selectAll("g.graph-group").remove(); // Clear previous graph
 
+  // Track current selection for re-rendering
+  currentSelectedId = selectedId;
+
   const graphGroup = svg.append("g").attr("class", "graph-group");
 
   // Create a deep copy to avoid side effects from D3 mutating the data
@@ -168,6 +173,19 @@ function updateGraph(selectedId) {
     // Full graph
     nodes = graphCopy.nodes;
     links = graphCopy.links;
+  }
+
+  // Filter unused components if toggle is off
+  if (!showUnusedImports) {
+    const unusedNodeIds = new Set(
+      nodes.filter(n => n.unused).map(n => n.id)
+    );
+    nodes = nodes.filter(n => !n.unused);
+    links = links.filter(l => {
+      const targetId = l.target.id || l.target;
+      const sourceId = l.source.id || l.source;
+      return !unusedNodeIds.has(targetId) && !unusedNodeIds.has(sourceId);
+    });
   }
 
   simulation = d3
@@ -419,6 +437,14 @@ refreshBtn.on("click", () => {
   vscode.postMessage({
     command: 'refresh'
   });
+});
+
+// Toggle for showing/hiding unused imports
+const showUnusedToggle = d3.select("#show-unused-toggle");
+showUnusedToggle.on("change", function() {
+  showUnusedImports = this.checked;
+  // Re-render graph with current selection
+  updateGraph(currentSelectedId);
 });
 
 function setupCombobox(input, list, clearBtn, sourceData) {

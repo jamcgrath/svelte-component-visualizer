@@ -359,6 +359,13 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <button id="show-all-btn">Show All Components</button>
       <button id="refresh-btn">Refresh Graph</button>
 
+      <div class="toggle-controls">
+        <label>
+          <input type="checkbox" id="show-unused-toggle" checked />
+          <span>Show Unused Imports</span>
+        </label>
+      </div>
+
       <div class="controls">
         <h2>Graph Controls</h2>
         <div>
@@ -454,6 +461,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
               <li>⚡ <strong>Used dynamically</strong> - Referenced via <code>&lt;svelte:component&gt;</code>, JavaScript logic, or dynamic imports</li>
             </ul>
             <p style="font-style: italic; color: #666; font-size: 0.9em;">Always verify before removing to ensure they're not used dynamically!</p>
+            <p style="margin-top: 12px;"><strong>💡 Tip:</strong> Use the <strong>"Show Unused Imports"</strong> checkbox below the legend to toggle their visibility in the graph.</p>
           </section>
 
           <section class="help-section">
