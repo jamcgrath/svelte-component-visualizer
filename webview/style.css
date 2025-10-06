@@ -23,13 +23,12 @@ body {
 .sidebar input[type="text"] {
   width: 100%;
   padding: var(--spacing-sm);
+  padding-right: var(--input-padding-with-clear); /* Make room for clear button */
   box-sizing: border-box;
 }
 
-.label-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.sidebar label {
+  display: block;
   margin-bottom: var(--spacing-xs);
 }
 
@@ -54,13 +53,26 @@ body {
 }
 
 .clear-search-btn {
+  position: absolute;
+  right: var(--input-clear-button-offset);
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: var(--font-size-5xl);
+  font-size: var(--input-clear-button-font-size);
+  width: var(--input-clear-button-size);
+  height: var(--input-clear-button-size);
   cursor: pointer;
-  display: none; /* Initially hidden */
   padding: 0;
   line-height: var(--line-height-tight);
+  z-index: var(--z-base);
+  display: none; /* Initially hidden, shown via JS */
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search-btn:not([style*="display: none"]) {
+  display: flex; /* When shown by JS */
 }
 
 .controls {

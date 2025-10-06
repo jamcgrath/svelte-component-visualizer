@@ -1,5 +1,76 @@
 /* Modern Theme - Rounded corners, soft shadows, gradients */
 
+/* ========================================
+   MODERN THEME - DEFAULT (LIGHT) TOKENS
+   ======================================== */
+
+:root,
+body[data-theme="modern"][data-scheme="light"] {
+  /* Backgrounds */
+  --color-bg-body: #f4f4f4;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-gradient-start: #ffffff;
+  --color-bg-surface-gradient-end: #fafafa;
+  --color-bg-container: #fafafa;
+  --color-bg-container-gradient-start: #fafafa;
+  --color-bg-container-gradient-end: #f4f6ff;
+  --color-bg-input: #ffffff;
+  --color-bg-button: #fff;
+  --color-bg-button-gradient-start: #fff;
+  --color-bg-button-gradient-end: #f4f6ff;
+  --color-bg-graph: #ffffff;
+  --color-bg-graph-gradient-start: #ffffff;
+  --color-bg-graph-gradient-end: #f8f8f8;
+  --color-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #f4f6ff;
+  --color-bg-hover-gradient-start: #f4f6ff;
+  --color-bg-hover-gradient-end: #e9edff;
+  --color-bg-button-hover: rgba(255, 255, 255, 1);
+  --color-bg-active: #e9edff;
+
+  /* Text Colors */
+  --color-text-primary: #1b1e3a;
+  --color-text-secondary: #5a5d78;
+  --color-text-muted: #5a5d78;
+  --color-text-inverse: #ffffff;
+  --color-text-on-surface: #111;
+  --color-text-node: #333;
+  --color-text-help: #333;
+  --color-text-code: #d4d4d4;
+
+  /* Border Colors */
+  --color-border-default: #dfe3f8;
+  --color-border-subtle: #e9ecf7;
+  --color-border-emphasis: #dfe3f8;
+  --color-border-input: #dfe3f8;
+  --color-border-input-focus: #dfe3f8;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #4a90e2;
+  --color-interactive-hover: #1b1e3a;
+
+  /* Focus States */
+  --color-focus-ring: #e9edff;
+  --color-focus-ring-inset: #000;
+
+  /* Range Slider */
+  --color-range-track: #dfe3f8;
+  --color-range-track-gradient-start: #dfe3f8;
+  --color-range-track-gradient-end: #e9ecf7;
+  --color-range-thumb: #fff;
+  --color-range-thumb-gradient-start: #fff;
+  --color-range-thumb-gradient-end: #f4f6ff;
+  --color-range-thumb-border: #dfe3f8;
+
+  /* Zoom Controls */
+  --color-zoom-bg: rgba(255, 255, 255, 0.9);
+  --color-zoom-bg-hover: rgba(255, 255, 255, 1);
+  --color-zoom-border: #dfe3f8;
+}
+
 body[data-theme="modern"] {
   background-color: var(--color-bg-body);
 }
@@ -164,9 +235,73 @@ body[data-theme="modern"][data-scheme="light"] .clear-search-btn:hover {
   color: var(--color-interactive-hover);
 }
 
-/* ===== DARK SCHEME ===== */
+/* ========================================
+   MODERN THEME - DARK SCHEME TOKENS
+   ======================================== */
 
 body[data-theme="modern"][data-scheme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #0f1118;
+  --color-bg-surface: #171a24;
+  --color-bg-surface-gradient-start: #171a24;
+  --color-bg-surface-gradient-end: #14161e;
+  --color-bg-container: #171a24;
+  --color-bg-container-gradient-start: #171a24;
+  --color-bg-container-gradient-end: #14161e;
+  --color-bg-input: #0f1118;
+  --color-bg-button: #1a1d2a;
+  --color-bg-button-gradient-start: #1a1d2a;
+  --color-bg-button-gradient-end: #141826;
+  --color-bg-graph: #181b28;
+  --color-bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #1a1d2a;
+  --color-bg-hover-gradient-start: #1a1d2a;
+  --color-bg-hover-gradient-end: #1f2332;
+  --color-bg-button-hover: rgba(26, 29, 42, 0.9);
+  --color-bg-active: #1f2332;
+
+  /* Text Colors */
+  --color-text-primary: #e7e9ee;
+  --color-text-secondary: #c6c9d8;
+  --color-text-muted: #c6c9d8;
+  --color-text-inverse: #e7e9ee;
+  --color-text-on-surface: #e7e9ee;
+  --color-text-node: #e7e9ee;
+  --color-text-help: #e7e9ee;
+  --color-text-code: #c6c9d8;
+
+  /* Border Colors */
+  --color-border-default: #2a2f44;
+  --color-border-subtle: #23283a;
+  --color-border-emphasis: #2a2f44;
+  --color-border-input: #2a2f44;
+  --color-border-input-focus: #2a2f44;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #4a90e2;
+  --color-interactive-hover: #e7e9ee;
+
+  /* Focus States */
+  --color-focus-ring: #293158;
+  --color-focus-ring-inset: #f7f3e8;
+
+  /* Range Slider */
+  --color-range-track: #404968;
+  --color-range-track-gradient-start: #404968;
+  --color-range-track-gradient-end: #3a4157;
+  --color-range-thumb: #2d3142;
+  --color-range-thumb-gradient-start: #2d3142;
+  --color-range-thumb-gradient-end: #252836;
+  --color-range-thumb-border: #4a5270;
+
+  /* Zoom Controls */
+  --color-zoom-bg: rgba(18, 20, 28, 0.75);
+  --color-zoom-bg-hover: rgba(26, 29, 42, 0.9);
+  --color-zoom-border: #2a2f44;
+
   background-color: var(--color-bg-body);
   color: var(--color-text-primary);
 }

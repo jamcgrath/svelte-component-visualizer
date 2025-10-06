@@ -368,16 +368,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         <h1 style="margin: 0;">Component Visualizer</h1>
         <button id="help-btn" title="Help & Instructions" style="background: none; border: 2px solid #6b7280; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 16px; font-weight: bold; color: #6b7280; display: flex; align-items: center; justify-content: center;">?</button>
       </div>
-      <div class="label-wrapper">
-        <label for="search-input">Search & Select Component</label>
-        <button
-          id="clear-search-btn"
-          class="clear-search-btn"
-          title="Clear search"
-        >
-          &times;
-        </button>
-      </div>
+      <label for="search-input">Search & Select Component</label>
       <div class="combobox-container">
         <input
           type="text"
@@ -385,19 +376,17 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
           placeholder="Type to search components..."
           autocomplete="off"
         />
-        <div id="results-list" class="results-list"></div>
-      </div>
-
-      <div class="label-wrapper">
-        <label for="route-search-input">Search & Select Route</label>
         <button
-          id="route-clear-search-btn"
+          id="clear-search-btn"
           class="clear-search-btn"
           title="Clear search"
         >
           &times;
         </button>
+        <div id="results-list" class="results-list"></div>
       </div>
+
+      <label for="route-search-input">Search & Select Route</label>
       <div class="combobox-container">
         <input
           type="text"
@@ -405,6 +394,13 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
           placeholder="Type to search routes..."
           autocomplete="off"
         />
+        <button
+          id="route-clear-search-btn"
+          class="clear-search-btn"
+          title="Clear search"
+        >
+          &times;
+        </button>
         <div id="route-results-list" class="results-list"></div>
       </div>
 

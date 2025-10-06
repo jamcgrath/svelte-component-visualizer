@@ -6,8 +6,81 @@ body[data-theme="retro"] {
   text-transform: uppercase;
 }
 
-/* Light scheme (default for retro - off-white paper) */
+/* ========================================
+   RETRO THEME - LIGHT SCHEME TOKENS
+   ======================================== */
+
 body[data-theme="retro"][data-scheme="light"] {
+  /* Backgrounds */
+  --color-bg-body: #faf6e7;
+  --color-bg-surface: #f7f3e8;
+  --color-bg-surface-gradient-start: #f7f3e8;
+  --color-bg-surface-gradient-end: #f7f3e8;
+  --color-bg-container: #f7f3e8;
+  --color-bg-container-gradient-start: #f7f3e8;
+  --color-bg-container-gradient-end: #f7f3e8;
+  --color-bg-input: #fff;
+  --color-bg-button: #fff;
+  --color-bg-button-gradient-start: #fff;
+  --color-bg-button-gradient-end: #fff;
+  --color-bg-graph: #faf6e7;
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #fffdf5;
+  --color-bg-hover-gradient-start: #f7f3e8;
+  --color-bg-hover-gradient-end: #f7f3e8;
+  --color-bg-button-hover: #fffdf5;
+  --color-bg-active: #f7f3e8;
+
+  /* Text Colors */
+  --color-text-primary: #000;
+  --color-text-secondary: #000;
+  --color-text-muted: #000;
+  --color-text-inverse: #000;
+  --color-text-on-surface: #111;
+  --color-text-node: #000;
+  --color-text-help: #000;
+  --color-text-code: #000;
+
+  /* Border Colors */
+  --color-border-default: #000;
+  --color-border-subtle: #000;
+  --color-border-emphasis: #000;
+  --color-border-input: #000;
+  --color-border-input-focus: #000;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #000;
+  --color-interactive-hover: #000;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #000;
+
+  /* Range Slider */
+  --color-range-track: #fff;
+  --color-range-track-gradient-start: #fff;
+  --color-range-track-gradient-end: #fff;
+  --color-range-thumb: #fff;
+  --color-range-thumb-gradient-start: #fff;
+  --color-range-thumb-gradient-end: #fff;
+  --color-range-thumb-border: #000;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #fff;
+  --color-zoom-bg-hover: #fffdf5;
+  --color-zoom-border: #000;
+
+  /* Shadows - Retro theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+
   background-color: var(--color-bg-body);
   color: var(--color-text-primary);
 }
@@ -229,9 +302,81 @@ body[data-theme="retro"][data-scheme="light"] .help-section code {
   text-transform: none;
 }
 
-/* ===== DARK SCHEME (CRT vibe on black) ===== */
+/* ========================================
+   RETRO THEME - DARK SCHEME TOKENS
+   ======================================== */
 
 body[data-theme="retro"][data-scheme="dark"] {
+  /* Backgrounds */
+  --color-bg-body: #000;
+  --color-bg-surface: #0f0f0f;
+  --color-bg-surface-gradient-start: #0f0f0f;
+  --color-bg-surface-gradient-end: #0f0f0f;
+  --color-bg-container: #0f0f0f;
+  --color-bg-container-gradient-start: #0f0f0f;
+  --color-bg-container-gradient-end: #0f0f0f;
+  --color-bg-input: #000;
+  --color-bg-button: #000;
+  --color-bg-button-gradient-start: #000;
+  --color-bg-button-gradient-end: #000;
+  --color-bg-graph: #000;
+  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+
+  /* Backgrounds - Interactive States */
+  --color-bg-hover: #1a1a1a;
+  --color-bg-hover-gradient-start: #1a1a1a;
+  --color-bg-hover-gradient-end: #1a1a1a;
+  --color-bg-button-hover: #1a1a1a;
+  --color-bg-active: #1a1a1a;
+
+  /* Text Colors */
+  --color-text-primary: #f7f3e8;
+  --color-text-secondary: #f7f3e8;
+  --color-text-muted: #f7f3e8;
+  --color-text-inverse: #f7f3e8;
+  --color-text-on-surface: #f7f3e8;
+  --color-text-node: #f7f3e8;
+  --color-text-help: #f7f3e8;
+  --color-text-code: #f7f3e8;
+
+  /* Border Colors */
+  --color-border-default: #f7f3e8;
+  --color-border-subtle: #f7f3e8;
+  --color-border-emphasis: #f7f3e8;
+  --color-border-input: #f7f3e8;
+  --color-border-input-focus: #f7f3e8;
+  --color-border-node: #fff;
+
+  /* Interactive Colors */
+  --color-interactive-primary: #f7f3e8;
+  --color-interactive-hover: #fff;
+
+  /* Focus States */
+  --color-focus-ring: transparent;
+  --color-focus-ring-inset: #f7f3e8;
+
+  /* Range Slider */
+  --color-range-track: #000;
+  --color-range-track-gradient-start: #000;
+  --color-range-track-gradient-end: #000;
+  --color-range-thumb: #000;
+  --color-range-thumb-gradient-start: #000;
+  --color-range-thumb-gradient-end: #000;
+  --color-range-thumb-border: #f7f3e8;
+
+  /* Zoom Controls */
+  --color-zoom-bg: #000;
+  --color-zoom-bg-hover: #1a1a1a;
+  --color-zoom-border: #f7f3e8;
+
+  /* Shadows - Retro theme uses no shadows */
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+
   background-color: var(--color-bg-body);
   color: var(--color-text-primary);
 }
