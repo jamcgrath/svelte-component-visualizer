@@ -3,6 +3,12 @@
 src/**
 .gitignore
 tsconfig.json
-component-visualizer/**
-node_modules/**/.bin/**
+node_modules/**
 *.vsix
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE
+.git/**
+.github/**
+**/*.map

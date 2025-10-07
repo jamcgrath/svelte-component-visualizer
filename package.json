@@ -3,18 +3,32 @@
   "displayName": "Svelte Component Visualizer",
   "description": "Visualize Svelte component dependencies as an interactive graph",
   "version": "0.1.0",
-  "publisher": "your-publisher-name",
+  "publisher": "YOUR-PUBLISHER-ID-HERE",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR-USERNAME/svelte-component-visualizer"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR-USERNAME/svelte-component-visualizer/issues"
+  },
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "visualization",
+    "components",
+    "dependencies",
+    "graph",
+    "architecture",
+    "diagram"
+  ],
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.80.0",
+    "node": ">=18.0.0"
   },
   "categories": [
     "Visualization",
     "Other"
-  ],
-  "activationEvents": [
-    "onCommand:svelteVisualizer.showGraph",
-    "onCommand:svelteVisualizer.refreshGraph",
-    "onCommand:svelteVisualizer.showComponentInGraph"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -36,6 +50,13 @@
     ],
     "menus": {
       "explorer/context": [
+        {
+          "command": "svelteVisualizer.showComponentInGraph",
+          "when": "resourceExtname == .svelte",
+          "group": "navigation@10"
+        }
+      ],
+      "editor/title/context": [
         {
           "command": "svelteVisualizer.showComponentInGraph",
           "when": "resourceExtname == .svelte",
@@ -90,8 +111,8 @@
   "scripts": {
     "vscode:prepublish": "npm run compile-extension && npm run bundle-webview",
     "compile": "npm run compile-extension",
-    "compile-extension": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
-    "bundle-webview": "esbuild src/webview/script.js --bundle --outfile=webview/script.js --format=iife",
+    "compile-extension": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap --minify",
+    "bundle-webview": "esbuild src/webview/script.js --bundle --outfile=webview/script.js --format=iife --minify",
     "watch": "esbuild src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node --sourcemap --watch",
     "pretest": "npm run compile",
     "lint": "eslint src --ext ts",
@@ -102,7 +123,7 @@
     "@types/vscode": "^1.80.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vscode/vsce": "^2.19.0",
+    "@vscode/vsce": "^3.6.2",
     "esbuild": "^0.25.10",
     "eslint": "^8.0.0",
     "typescript": "^5.0.0"
@@ -110,7 +131,7 @@
   "dependencies": {
     "d3": "^7.9.0",
     "estree-walker": "^3.0.3",
-    "glob": "^10.4.2",
+    "glob": "^11.0.0",
     "svelte": "^5.0.0-rc.1"
   }
 }

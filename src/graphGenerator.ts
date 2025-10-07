@@ -29,8 +29,10 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
     const routesBasePath = config.get<string>('routesBasePath') || 'routes';
 
     // Combine all patterns and resolve relative to workspace
+    // Use path.posix.join to ensure forward slashes for glob (works on Windows too)
+    const normalizedWorkspace = workspacePath.replace(/\\/g, '/');
     const allPatterns = [...componentPatterns, ...routePatterns].map(pattern =>
-        path.join(workspacePath, pattern)
+        path.posix.join(normalizedWorkspace, pattern)
     );
 
     // Scan for Svelte files

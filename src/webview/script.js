@@ -39,9 +39,14 @@ svg
   .attr("fill", "#999");
 
 // --- Zoom ---
-const zoom = d3.zoom().on("zoom", (event) => {
-  svg.select("g.graph-group").attr("transform", event.transform);
-});
+const zoom = d3.zoom()
+  .on("zoom", (event) => {
+    svg.select("g.graph-group").attr("transform", event.transform);
+  })
+  .filter((event) => {
+    // Disable zoom on double-click, but allow all other zoom interactions
+    return !event.button && event.type !== 'dblclick';
+  });
 svg.call(zoom);
 
 // --- Accessibility ---
@@ -340,12 +345,14 @@ const graphContainerEl = document.getElementById("graph-container");
 // Prevent default drag behavior
 graphContainerEl.addEventListener("dragover", (event) => {
   event.preventDefault();
+  event.stopPropagation();
   event.dataTransfer.dropEffect = "copy";
   graphContainerEl.style.backgroundColor = "#e8f4f8";
   graphContainerEl.style.outline = "3px dashed #4682b4";
 });
 
 graphContainerEl.addEventListener("dragleave", (event) => {
+  event.stopPropagation();
   if (event.target === graphContainerEl) {
     graphContainerEl.style.backgroundColor = "";
     graphContainerEl.style.outline = "";
@@ -354,6 +361,7 @@ graphContainerEl.addEventListener("dragleave", (event) => {
 
 graphContainerEl.addEventListener("drop", (event) => {
   event.preventDefault();
+  event.stopPropagation();
   graphContainerEl.style.backgroundColor = "";
   graphContainerEl.style.outline = "";
 
@@ -389,7 +397,6 @@ const showAllBtn = d3.select("#show-all-btn");
 const refreshBtn = d3.select("#refresh-btn");
 const zoomInBtn = d3.select("#zoom-in");
 const zoomOutBtn = d3.select("#zoom-out");
-const zoomResetBtn = d3.select("#zoom-reset");
 const panRecenterBtn = d3.select("#pan-recenter");
 const panUpBtn = d3.select("#pan-up");
 const panDownBtn = d3.select("#pan-down");
@@ -422,7 +429,6 @@ const resetTransform = () => {
   svg.transition().duration(250).call(zoom.transform, d3.zoomIdentity);
 };
 
-zoomResetBtn.on("click", resetTransform);
 panRecenterBtn.on("click", resetTransform);
 
 showAllBtn.on("click", () => {
