@@ -86,6 +86,15 @@ async function showVisualizerPanel(context: vscode.ExtensionContext) {
                     case 'focusFileInGraph':
                         await focusDroppedFile(message.filePath, currentPanel!);
                         break;
+                    case 'revealInExplorer':
+                        await revealComponentInExplorer(message.componentName, message.nodeType);
+                        break;
+                    case 'copyFileName':
+                        await copyComponentFileName(message.componentName, message.nodeType);
+                        break;
+                    case 'copyFilePath':
+                        await copyComponentFilePath(message.componentName, message.nodeType);
+                        break;
                 }
             },
             undefined,
@@ -324,6 +333,102 @@ async function openComponentFile(componentName: string, nodeType: string) {
     vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
 }
 
+async function findComponentFileUri(componentName: string, nodeType: string): Promise<vscode.Uri | null> {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+        return null;
+    }
+
+    const config = vscode.workspace.getConfiguration('svelteVisualizer');
+    const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+    let searchPatterns: string[];
+
+    if (nodeType === 'route') {
+        searchPatterns = config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'];
+    } else {
+        searchPatterns = [
+            ...(config.get<string[]>('componentPaths') || ['**/*.svelte']),
+            ...(config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'])
+        ];
+    }
+
+    // Search for the component file
+    for (const pattern of searchPatterns) {
+        const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
+
+        for (const file of files) {
+            const fileName = path.basename(file.fsPath, '.svelte');
+
+            // For routes, match the full route name format
+            if (nodeType === 'route') {
+                const normalizedFile = file.fsPath.replace(/\\/g, '/');
+                const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
+
+                if (routesMatch) {
+                    const routePath = path.dirname(routesMatch[2]);
+                    const baseName = path.basename(file.fsPath);
+
+                    let fileType = '';
+                    if (baseName.startsWith('+page')) fileType = '(page)';
+                    else if (baseName.startsWith('+layout')) fileType = '(layout)';
+                    else if (baseName.startsWith('+error')) fileType = '(error)';
+
+                    const routeName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
+
+                    if (routeName === componentName) {
+                        return file;
+                    }
+                }
+            } else if (fileName === componentName) {
+                return file;
+            }
+        }
+    }
+
+    return null;
+}
+
+async function revealComponentInExplorer(componentName: string, nodeType: string) {
+    const fileUri = await findComponentFileUri(componentName, nodeType);
+
+    if (fileUri) {
+        await vscode.commands.executeCommand('revealInExplorer', fileUri);
+    } else {
+        vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
+    }
+}
+
+async function copyComponentFileName(componentName: string, nodeType: string) {
+    const fileUri = await findComponentFileUri(componentName, nodeType);
+
+    if (fileUri) {
+        const fileName = path.basename(fileUri.fsPath);
+        await vscode.env.clipboard.writeText(fileName);
+        vscode.window.showInformationMessage(`Copied: ${fileName}`);
+    } else {
+        vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
+    }
+}
+
+async function copyComponentFilePath(componentName: string, nodeType: string) {
+    const fileUri = await findComponentFileUri(componentName, nodeType);
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+    if (fileUri && workspaceFolder) {
+        // Get relative path from workspace root
+        const relativePath = path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath);
+        await vscode.env.clipboard.writeText(relativePath);
+        vscode.window.showInformationMessage(`Copied: ${relativePath}`);
+    } else if (fileUri) {
+        // Fallback to absolute path if no workspace
+        const filePath = fileUri.fsPath;
+        await vscode.env.clipboard.writeText(filePath);
+        vscode.window.showInformationMessage(`Copied: ${filePath}`);
+    } else {
+        vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
+    }
+}
+
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview): string {
     const tokensUri = webview.asWebviewUri(
         vscode.Uri.file(path.join(context.extensionPath, 'webview', 'tokens', 'design-tokens.css'))
@@ -537,6 +642,16 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
         </div>
       </div>
       <svg id="graph"></svg>
+    </div>
+
+    <!-- Context Menu for Graph Nodes -->
+    <div id="node-context-menu" class="context-menu" style="display: none;">
+      <div class="context-menu-item" data-action="open">Open in Editor</div>
+      <div class="context-menu-item" data-action="focus">Focus in Visualizer</div>
+      <div class="context-menu-item" data-action="reveal">Reveal in Explorer</div>
+      <div class="context-menu-separator"></div>
+      <div class="context-menu-item" data-action="copyName">Copy File Name</div>
+      <div class="context-menu-item" data-action="copyPath">Copy File Path</div>
     </div>
 
     <script>

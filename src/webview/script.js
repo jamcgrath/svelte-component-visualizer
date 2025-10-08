@@ -278,6 +278,12 @@ function updateGraph(selectedId) {
         componentName: d.id,
         nodeType: d.type
       });
+    })
+    .on("contextmenu", (event, d) => {
+      // Right-click shows context menu
+      event.preventDefault();
+      event.stopPropagation();
+      showNodeContextMenu(event, d);
     });
 
   // Append a circle for components and a rect for routes
@@ -360,10 +366,16 @@ graphContainerEl.addEventListener("dragleave", (event) => {
 });
 
 graphContainerEl.addEventListener("drop", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
   graphContainerEl.style.backgroundColor = "";
   graphContainerEl.style.outline = "";
+
+  // Only process drop if Shift key is pressed
+  if (!event.shiftKey) {
+    return; // Let default behavior happen (open file in editor)
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
 
   // VS Code provides file URIs in dataTransfer
   const text = event.dataTransfer.getData("text/plain");
@@ -655,3 +667,105 @@ function applyTheme(theme, colorScheme) {
     existingThemeLink.href = newHref;
   }
 }
+
+// --- Context Menu ---
+const contextMenu = d3.select("#node-context-menu");
+let contextMenuData = null;
+
+function showNodeContextMenu(event, nodeData) {
+  contextMenuData = nodeData;
+
+  // Position the menu at cursor
+  const x = event.pageX;
+  const y = event.pageY;
+
+  contextMenu
+    .style("display", "block")
+    .style("left", `${x}px`)
+    .style("top", `${y}px`);
+
+  // Adjust position if menu goes off-screen
+  setTimeout(() => {
+    const menuNode = contextMenu.node();
+    const menuRect = menuNode.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let adjustedX = x;
+    let adjustedY = y;
+
+    if (menuRect.right > viewportWidth) {
+      adjustedX = viewportWidth - menuRect.width - 5;
+    }
+    if (menuRect.bottom > viewportHeight) {
+      adjustedY = viewportHeight - menuRect.height - 5;
+    }
+
+    contextMenu
+      .style("left", `${adjustedX}px`)
+      .style("top", `${adjustedY}px`);
+  }, 0);
+}
+
+function hideContextMenu() {
+  contextMenu.style("display", "none");
+  contextMenuData = null;
+}
+
+// Handle context menu item clicks
+contextMenu.selectAll(".context-menu-item").on("click", function() {
+  const action = d3.select(this).attr("data-action");
+
+  if (!contextMenuData) return;
+
+  switch (action) {
+    case "open":
+      vscode.postMessage({
+        command: 'openFile',
+        componentName: contextMenuData.id,
+        nodeType: contextMenuData.type
+      });
+      break;
+
+    case "focus":
+      updateGraph(contextMenuData.id);
+      break;
+
+    case "reveal":
+      vscode.postMessage({
+        command: 'revealInExplorer',
+        componentName: contextMenuData.id,
+        nodeType: contextMenuData.type
+      });
+      break;
+
+    case "copyName":
+      vscode.postMessage({
+        command: 'copyFileName',
+        componentName: contextMenuData.id,
+        nodeType: contextMenuData.type
+      });
+      break;
+
+    case "copyPath":
+      vscode.postMessage({
+        command: 'copyFilePath',
+        componentName: contextMenuData.id,
+        nodeType: contextMenuData.type
+      });
+      break;
+  }
+
+  hideContextMenu();
+});
+
+// Close context menu when clicking outside or pressing Escape
+d3.select("body").on("click.contextmenu", () => {
+  hideContextMenu();
+});
+
+d3.select("body").on("keydown.contextmenu", (event) => {
+  if (event.key === "Escape") {
+    hideContextMenu();
+  }
+});
