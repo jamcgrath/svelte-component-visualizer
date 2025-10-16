@@ -348,24 +348,45 @@ d3.select("body").on("keydown.help", (event) => {
 // --- Drag and Drop ---
 const graphContainerEl = document.getElementById("graph-container");
 
+// Track drag state to prevent dragleave from clearing styles prematurely
+let isDragging = false;
+
 // Prevent default drag behavior
+graphContainerEl.addEventListener("dragenter", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  isDragging = true;
+});
+
 graphContainerEl.addEventListener("dragover", (event) => {
   event.preventDefault();
   event.stopPropagation();
-  event.dataTransfer.dropEffect = "copy";
-  graphContainerEl.style.backgroundColor = "#e8f4f8";
-  graphContainerEl.style.outline = "3px dashed #4682b4";
+  isDragging = true;
+
+  // Visual feedback depends on whether Shift is pressed
+  if (event.shiftKey) {
+    event.dataTransfer.dropEffect = "copy";
+    graphContainerEl.style.backgroundColor = "#e8f4f8";
+    graphContainerEl.style.outline = "3px dashed #4682b4";
+  } else {
+    event.dataTransfer.dropEffect = "none";
+    graphContainerEl.style.backgroundColor = "#fff3cd";
+    graphContainerEl.style.outline = "3px dashed #ffc107";
+  }
 });
 
 graphContainerEl.addEventListener("dragleave", (event) => {
   event.stopPropagation();
-  if (event.target === graphContainerEl) {
+  // Only clear if we're actually leaving the container (not just moving between child elements)
+  if (event.target === graphContainerEl && !graphContainerEl.contains(event.relatedTarget)) {
+    isDragging = false;
     graphContainerEl.style.backgroundColor = "";
     graphContainerEl.style.outline = "";
   }
 });
 
 graphContainerEl.addEventListener("drop", (event) => {
+  isDragging = false;
   graphContainerEl.style.backgroundColor = "";
   graphContainerEl.style.outline = "";
 
@@ -377,25 +398,44 @@ graphContainerEl.addEventListener("drop", (event) => {
   event.preventDefault();
   event.stopPropagation();
 
-  // VS Code provides file URIs in dataTransfer
-  const text = event.dataTransfer.getData("text/plain");
+  // Try multiple data formats that VSCode uses
+  // Format 1: text/uri-list (primary format used by VSCode explorer)
+  let uriList = event.dataTransfer.getData("text/uri-list");
 
-  // Try to extract file path from the dropped data
-  // VS Code drag format can vary, so we'll handle multiple formats
+  // Format 2: text/plain (fallback)
+  let textPlain = event.dataTransfer.getData("text/plain");
+
+  // Format 3: Check files array
+  const filesArray = event.dataTransfer.files;
+
   let filePath = null;
 
-  if (text) {
-    // Handle VS Code URI format (file:// or vscode-resource://)
-    const uriMatch = text.match(/(?:file:\/\/|vscode-resource:\/\/)(.+\.svelte)/);
-    if (uriMatch) {
-      filePath = decodeURIComponent(uriMatch[1]);
-    } else if (text.endsWith('.svelte')) {
-      // Direct file path
-      filePath = text;
+  // Try extracting file path from uri-list first (most reliable for VSCode)
+  if (uriList) {
+    // uri-list can contain multiple URIs separated by newlines
+    const uris = uriList.split('\n').filter(uri => uri.trim() && !uri.startsWith('#'));
+    if (uris.length > 0) {
+      const uri = uris[0].trim();
+      filePath = extractFilePathFromUri(uri);
     }
   }
 
-  if (filePath) {
+  // Fallback to text/plain
+  if (!filePath && textPlain) {
+    filePath = extractFilePathFromUri(textPlain.trim());
+  }
+
+  // Fallback to files array
+  if (!filePath && filesArray.length > 0) {
+    const file = filesArray[0];
+    if (file.name.endsWith('.svelte')) {
+      // For files array, we might need to get the full path differently
+      // In some contexts, the file.path property exists
+      filePath = file.path || file.name;
+    }
+  }
+
+  if (filePath && filePath.endsWith('.svelte')) {
     // Send message to extension to identify and focus the component
     vscode.postMessage({
       command: 'focusFileInGraph',
@@ -404,30 +444,57 @@ graphContainerEl.addEventListener("drop", (event) => {
   }
 });
 
+// Helper function to extract file path from various URI formats
+function extractFilePathFromUri(uri) {
+  if (!uri) return null;
+
+  // Handle various VSCode URI schemes
+  // Format: file:///path/to/file.svelte
+  // Format: vscode-remote://ssh-remote+host/path/to/file.svelte
+  // Format: vscode-vfs://github/user/repo/file.svelte
+  // Format: vscode-resource:///path/to/file.svelte
+  // Format: vsls:/path/to/file.svelte (Live Share)
+
+  const uriPatterns = [
+    // Standard file:// URIs
+    /^file:\/\/(.+\.svelte)$/i,
+    // vscode-remote:// URIs (remote SSH, containers, WSL, etc.)
+    /^vscode-remote:\/\/[^/]+(.+\.svelte)$/i,
+    // vscode-vfs:// URIs (virtual file systems)
+    /^vscode-vfs:\/\/[^/]+(.+\.svelte)$/i,
+    // vscode-resource:// URIs (webview resources)
+    /^vscode-resource:\/\/(.+\.svelte)$/i,
+    // vsls:// URIs (Live Share)
+    /^vsls:\/(.+\.svelte)$/i,
+  ];
+
+  for (const pattern of uriPatterns) {
+    const match = uri.match(pattern);
+    if (match) {
+      return decodeURIComponent(match[1]);
+    }
+  }
+
+  // Handle workspace-relative paths (common in containerized/cloud environments)
+  // Format: /workspaces/project-name/path/to/file.svelte
+  if (uri.startsWith('/') && uri.endsWith('.svelte')) {
+    return uri;
+  }
+
+  // If it's already a plain path ending in .svelte, use it directly
+  if (uri.endsWith('.svelte') && !uri.includes('://')) {
+    return uri;
+  }
+
+  return null;
+}
+
 // --- Event Listeners ---
 const showAllBtn = d3.select("#show-all-btn");
 const refreshBtn = d3.select("#refresh-btn");
 const zoomInBtn = d3.select("#zoom-in");
 const zoomOutBtn = d3.select("#zoom-out");
 const panRecenterBtn = d3.select("#pan-recenter");
-const panUpBtn = d3.select("#pan-up");
-const panDownBtn = d3.select("#pan-down");
-const panLeftBtn = d3.select("#pan-left");
-const panRightBtn = d3.select("#pan-right");
-const panStep = 50;
-
-panUpBtn.on("click", () => {
-  svg.transition().duration(250).call(zoom.translateBy, 0, panStep);
-});
-panDownBtn.on("click", () => {
-  svg.transition().duration(250).call(zoom.translateBy, 0, -panStep);
-});
-panLeftBtn.on("click", () => {
-  svg.transition().duration(250).call(zoom.translateBy, panStep, 0);
-});
-panRightBtn.on("click", () => {
-  svg.transition().duration(250).call(zoom.translateBy, -panStep, 0);
-});
 
 zoomInBtn.on("click", () => {
   svg.transition().duration(250).call(zoom.scaleBy, 1.2);

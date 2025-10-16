@@ -3,14 +3,14 @@
   "displayName": "Svelte Component Visualizer",
   "description": "Visualize Svelte component dependencies as an interactive graph",
   "version": "0.1.0",
-  "publisher": "YOUR-PUBLISHER-ID-HERE",
+  "publisher": "jamcgrath",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-USERNAME/svelte-component-visualizer"
+    "url": "https://github.com/jamcgrath/svelte-component-visualizer"
   },
   "bugs": {
-    "url": "https://github.com/YOUR-USERNAME/svelte-component-visualizer/issues"
+    "url": "https://github.com/jamcgrath/svelte-component-visualizer/issues"
   },
   "keywords": [
     "svelte",
@@ -89,7 +89,12 @@
         },
         "svelteVisualizer.theme": {
           "type": "string",
-          "enum": ["flat", "modern", "retro", "retro-alt"],
+          "enum": [
+            "flat",
+            "modern",
+            "retro",
+            "retro-alt"
+          ],
           "enumDescriptions": [
             "Flat - Ableton-like minimal design",
             "Modern - Rounded corners and gradients (default)",
@@ -101,7 +106,11 @@
         },
         "svelteVisualizer.colorScheme": {
           "type": "string",
-          "enum": ["auto", "light", "dark"],
+          "enum": [
+            "auto",
+            "light",
+            "dark"
+          ],
           "default": "auto",
           "description": "Color scheme for the visualizer. 'auto' follows VS Code's theme"
         }
@@ -132,6 +141,6 @@
     "d3": "^7.9.0",
     "estree-walker": "^3.0.3",
     "glob": "^11.0.0",
-    "svelte": "^5.0.0-rc.1"
+    "svelte": "^5.39.11"
   }
 }

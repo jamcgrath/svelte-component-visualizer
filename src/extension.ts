@@ -633,13 +633,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <div id="zoom-controls">
         <button id="zoom-in" title="Zoom In">+</button>
         <button id="zoom-out" title="Zoom Out">-</button>
-        <div id="pan-controls">
-          <button id="pan-up" title="Pan Up">↑</button>
-          <button id="pan-left" title="Pan Left">←</button>
-          <button id="pan-recenter" title="Reset View">◎</button>
-          <button id="pan-right" title="Pan Right">→</button>
-          <button id="pan-down" title="Pan Down">↓</button>
-        </div>
+        <button id="pan-recenter" title="Reset View">◎</button>
       </div>
       <svg id="graph"></svg>
     </div>
