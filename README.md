@@ -2,7 +2,7 @@
 
 A VSCode extension that visualizes Svelte component dependencies as an interactive graph, helping you understand and navigate your component architecture.
 
-> Note: Screenshots coming soon! See the [Usage](#usage) section below for how to use the visualizer.
+![Demo](./screenshots/demo.gif)
 
 ## Features
 
@@ -17,6 +17,24 @@ A VSCode extension that visualizes Svelte component dependencies as an interacti
 - Keyboard Shortcuts - Cmd/Ctrl+Click nodes to focus on them
 - Route Support - Visualize SvelteKit routes (+page, +layout, +error) alongside components
 - Cross-Platform - Works on Windows, macOS, and Linux
+
+## Screenshots
+
+### Interactive Component Graph
+![Component Graph Visualization](./screenshots/hero-graph.png)
+*Visualize all component relationships in your Svelte project with an interactive force-directed graph*
+
+### Search and Focus
+![Search Functionality](./screenshots/search.png)
+*Quickly find and focus on specific components or routes*
+
+### Focused View with Dependency Colors
+![Focused View](./screenshots/focused-view.png)
+*View a component's direct dependencies with color-coded relationships: red (focused), blue (parents), green (children)*
+
+### Context Menu Integration
+![Context Menu](./screenshots/context-menu.png)
+*Right-click any .svelte file to open it in the visualizer*
 
 ## Usage
 
@@ -200,7 +218,7 @@ npm run package
 
 ## Contributing
 
-Found a bug or have a feature request? Please [open an issue](https://github.com/YOUR-USERNAME/svelte-component-visualizer/issues) on GitHub.
+Found a bug or have a feature request? Please [open an issue](https://github.com/jamcgrath/svelte-component-visualizer/issues) on GitHub.
 
 ## License
 
