@@ -547,26 +547,30 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
 
       <div class="legend">
         <h2>Legend</h2>
-        <div class="legend-item">
+        <div class="legend-item" data-filter="selected">
           <div class="legend-color" style="background-color: #ff6347"></div>
           <span>Selected</span>
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-filter="parent" role="button" tabindex="0" aria-pressed="true" title="Click to toggle visibility">
           <div class="legend-color" style="background-color: #4682b4"></div>
           <span>Parent (Uses Selected)</span>
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-filter="child" role="button" tabindex="0" aria-pressed="true" title="Click to toggle visibility">
           <div class="legend-color" style="background-color: #32cd32"></div>
           <span>Child (Used by Selected)</span>
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-filter="default" role="button" tabindex="0" aria-pressed="true" title="Click to toggle visibility" style="display: none">
+          <div class="legend-color" style="background-color: #3182bd"></div>
+          <span>Component</span>
+        </div>
+        <div class="legend-item" data-filter="route" role="button" tabindex="0" aria-pressed="true" title="Click to toggle visibility">
           <div
             class="legend-color"
             style="background-color: #9b59b6; border-radius: 2px"
           ></div>
           <span>Route File</span>
         </div>
-        <div class="legend-item">
+        <div class="legend-item" data-filter="unused" role="button" tabindex="0" aria-pressed="true" title="Click to toggle visibility">
           <div
             class="legend-color"
             style="background-color: #ffa500; border: 2px dashed #fff; opacity: 0.7"
@@ -623,6 +627,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
               <li>Use the search boxes to find and focus on specific components or routes</li>
               <li>Click "Show All Components" to view the complete graph</li>
               <li>Use "Refresh Graph" to reload after making file changes</li>
+              <li>Click legend items to toggle visibility of node types (Parent, Child, Route, Unused Import)</li>
             </ul>
           </section>
         </div>

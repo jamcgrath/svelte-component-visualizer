@@ -10,6 +10,7 @@ A VSCode extension that visualizes Svelte component dependencies as an interacti
 - Component and Route Search - Quickly find and focus on specific components or SvelteKit routes
 - Multiple Visual Themes - Choose from modern, flat, retro, or retro-alt themes with light/dark modes
 - Unused Import Detection - Identify imported but unused components (shown with orange dashed borders)
+- Legend Filters - Click legend items to show/hide specific node types (parents, children, routes, unused imports)
 - Drag and Drop Support - Drag .svelte files from Explorer onto the graph to focus on them
 - Context Menu Integration - Right-click files in Explorer or editor tabs to open in visualizer
 - Go to Definition - Double-click any node to open the component file in the editor
@@ -66,6 +67,7 @@ You can open the visualizer in three ways:
 - Show All Button - Reset to display the entire graph
 - Refresh Button - Regenerate the graph after making file changes
 - Toggle Unused Imports - Show/hide components that are imported but not used in templates
+- Legend Filters - Click legend items (Parent, Child, Route, Unused Import) to toggle their visibility in the graph
 
 > **Note for Code OSS / Cloud Workstations**: Drag and drop is not supported in browser-based VSCode environments due to webview limitations. Use the context menu instead: right-click any `.svelte` file and select "Open in Component Visualizer".
 

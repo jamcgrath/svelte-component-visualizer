@@ -11,6 +11,9 @@ let sortedComponents, sortedRoutes;
 let showUnusedImports = true;
 let currentSelectedId = null; // Track current selection for re-rendering
 
+// Per-category visibility toggles (legend filters)
+const categoryVisible = { parent: true, child: true, route: true, unused: true, default: true };
+
 // --- UI Elements ---
 const searchInput = d3.select("#search-input");
 const resultsList = d3.select("#results-list");
@@ -136,7 +139,17 @@ function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
   announceToScreenReader(`Selected ${nodeId}`);
 }
 
+function updateLegendVisibility(isFocusedView) {
+  // In focused view: show selected, parent, child; hide default
+  // In full graph view: show default; hide selected, parent, child
+  d3.select('.legend-item[data-filter="selected"]').style("display", isFocusedView ? null : "none");
+  d3.select('.legend-item[data-filter="parent"]').style("display", isFocusedView ? null : "none");
+  d3.select('.legend-item[data-filter="child"]').style("display", isFocusedView ? null : "none");
+  d3.select('.legend-item[data-filter="default"]').style("display", isFocusedView ? "none" : null);
+}
+
 function updateGraph(selectedId) {
+  updateLegendVisibility(!!selectedId);
   svg.selectAll("g.graph-group").remove(); // Clear previous graph
 
   // Track current selection for re-rendering
@@ -193,6 +206,51 @@ function updateGraph(selectedId) {
     });
   }
 
+  // Classify nodes into categories for legend filtering
+  if (selectedId) {
+    const parentIds = new Set(
+      links
+        .filter(l => (l.target === selectedId || l.target.id === selectedId))
+        .map(l => l.source.id || l.source)
+    );
+    nodes.forEach(node => {
+      if (node.id === selectedId) {
+        node._category = 'selected';
+      } else if (node.type === 'route') {
+        node._category = 'route';
+      } else if (node.unused) {
+        node._category = 'unused';
+      } else {
+        node._category = parentIds.has(node.id) ? 'parent' : 'child';
+      }
+    });
+  } else {
+    nodes.forEach(node => {
+      if (node.type === 'route') {
+        node._category = 'route';
+      } else if (node.unused) {
+        node._category = 'unused';
+      } else {
+        node._category = 'default';
+      }
+    });
+  }
+
+  // Apply legend category filters (never filter out 'selected')
+  const hiddenNodeIds = new Set(
+    nodes
+      .filter(n => n._category !== 'selected' && !categoryVisible[n._category])
+      .map(n => n.id)
+  );
+  if (hiddenNodeIds.size > 0) {
+    nodes = nodes.filter(n => !hiddenNodeIds.has(n.id));
+    links = links.filter(l => {
+      const src = l.source.id || l.source;
+      const tgt = l.target.id || l.target;
+      return !hiddenNodeIds.has(src) && !hiddenNodeIds.has(tgt);
+    });
+  }
+
   simulation = d3
     .forceSimulation(nodes)
     .force(
@@ -235,33 +293,9 @@ function updateGraph(selectedId) {
     .append("g")
     .attr("class", (d) => {
       let classes = "node";
-      if (d.type === 'route') {
-          classes += " node--route";
-      }
-
-      // Add unused class if applicable
-      if (d.unused) {
-          classes += " node--unused";
-      }
-
-      if (!selectedId) {
-          if (d.type !== 'route') {
-              classes += " node--default";
-          }
-      } else {
-          if (d.id === selectedId) {
-              classes += " node--selected";
-          } else {
-              const isParent = links.some(
-                  (l) => l.source.id === d.id && l.target.id === selectedId
-              );
-              if (isParent) {
-                  classes += " node--parent";
-              } else {
-                  classes += " node--child";
-              }
-          }
-      }
+      if (d.type === 'route') classes += " node--route";
+      if (d.unused) classes += " node--unused";
+      if (d._category) classes += ` node--${d._category}`;
       return classes;
     })
     .call(drag(simulation))
@@ -530,6 +564,27 @@ showUnusedToggle.on("change", function() {
   showUnusedImports = this.checked;
   // Re-render graph with current selection
   updateGraph(currentSelectedId);
+});
+
+// Legend filter toggles
+d3.selectAll(".legend-item[data-filter]").each(function() {
+  const item = d3.select(this);
+  const category = item.attr("data-filter");
+  if (!Object.prototype.hasOwnProperty.call(categoryVisible, category)) return;
+
+  item.on("click", function() {
+    categoryVisible[category] = !categoryVisible[category];
+    item.attr("aria-pressed", categoryVisible[category] ? "true" : "false");
+    item.classed("legend-item--inactive", !categoryVisible[category]);
+    updateGraph(currentSelectedId);
+  });
+
+  item.on("keydown", function(event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.click();
+    }
+  });
 });
 
 function setupCombobox(input, list, clearBtn, sourceData) {

@@ -250,7 +250,6 @@ svg {
 
 .links line.link--unused {
   stroke-dasharray: 5, 5;
-  opacity: var(--color-link-unused-opacity);
 }
 
 .legend {
@@ -274,6 +273,34 @@ svg {
   height: var(--icon-size-sm);
   border-radius: var(--radius-full);
   margin-right: var(--spacing-sm);
+}
+
+.legend-item[role="button"] {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 2px var(--spacing-xs) 2px 0;
+  transition: opacity 0.15s ease;
+}
+
+.legend-item[role="button"]:hover {
+  opacity: 0.7;
+}
+
+.legend-item[role="button"]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.legend-item--inactive {
+  opacity: 0.4;
+}
+
+.legend-item--inactive:hover {
+  opacity: 0.55;
+}
+
+.legend-item--inactive span {
+  text-decoration: line-through;
 }
 
 .toggle-controls {
