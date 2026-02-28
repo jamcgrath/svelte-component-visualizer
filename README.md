@@ -205,18 +205,13 @@ npm run package
 
 ## Release Notes
 
-### 0.1.0 (Initial Release)
+### 0.2.0
 
-- Interactive component dependency visualization with D3.js force-directed graph
-- Search and filter components and routes
-- Double-click to open files, Cmd/Ctrl+Click to focus
-- Multiple visual themes (modern, flat, retro, retro-alt) with light/dark modes
-- SvelteKit route support (+page, +layout, +error)
-- Unused import detection and visualization
-- Drag and drop .svelte files onto graph
-- Context menu integration (Explorer + Editor tabs)
-- Customizable graph physics controls
-- Cross-platform support (Windows, macOS, Linux)
+- Legend filter toggles — click legend items to show/hide node types (parents, children, routes, unused imports)
+- Improved dashed link visibility on dark themes
+- Keyboard focus ring on legend toggle buttons
+- Dependency updates
+
 
 ## Contributing
 
