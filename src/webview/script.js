@@ -208,6 +208,11 @@ function updateGraph(selectedId) {
 
   // Classify nodes into categories for legend filtering
   if (selectedId) {
+    const parentIds = new Set(
+      links
+        .filter(l => (l.target === selectedId || l.target.id === selectedId))
+        .map(l => l.source.id || l.source)
+    );
     nodes.forEach(node => {
       if (node.id === selectedId) {
         node._category = 'selected';
@@ -216,11 +221,7 @@ function updateGraph(selectedId) {
       } else if (node.unused) {
         node._category = 'unused';
       } else {
-        const isParent = links.some(
-          l => (l.source === node.id || l.source.id === node.id)
-            && (l.target === selectedId || l.target.id === selectedId)
-        );
-        node._category = isParent ? 'parent' : 'child';
+        node._category = parentIds.has(node.id) ? 'parent' : 'child';
       }
     });
   } else {

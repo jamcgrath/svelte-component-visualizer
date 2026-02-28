@@ -287,6 +287,12 @@ svg {
   opacity: 0.7;
 }
 
+.legend-item[role="button"]:focus-visible,
+.legend-item[role="button"]:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .legend-item--inactive {
   opacity: 0.4;
 }
