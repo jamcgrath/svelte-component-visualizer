@@ -161,7 +161,6 @@
   /* Graph Elements */
   --color-link-default: #999;
   --color-link-opacity: 0.6;
-  --color-link-unused-opacity: 0.4;
 
   /* Node Colors - Graph Visualization */
   --color-node-selected: #ff6347;

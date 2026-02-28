@@ -250,7 +250,6 @@ svg {
 
 .links line.link--unused {
   stroke-dasharray: 5, 5;
-  opacity: var(--color-link-unused-opacity);
 }
 
 .legend {
