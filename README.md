@@ -65,11 +65,20 @@ You can open the visualizer in three ways:
 - Click and Drag Background - Pan around the graph
 - Search Boxes - Type to find and focus on specific components or routes
 - Show All Button - Reset to display the entire graph
-- Refresh Button - Regenerate the graph after making file changes
+- Refresh Command - Run `Svelte: Refresh Component Graph` from the Command Palette
 - Toggle Unused Imports - Show/hide components that are imported but not used in templates
 - Legend Filters - Click legend items (Parent, Child, Route, Unused Import) to toggle their visibility in the graph
 
 > **Note for Code OSS / Cloud Workstations**: Drag and drop is not supported in browser-based VSCode environments due to webview limitations. Use the context menu instead: right-click any `.svelte` file and select "Open in Component Visualizer".
+
+### Terminal File References
+
+- Explorer / Editor: Right-click a file and choose **Svelte: Insert File Path in Terminal**
+- Visualizer: Right-click a node and choose **Insert File Path in Terminal**
+- The path is inserted into the **active integrated terminal session** with a trailing space (no auto-execute)
+- Configure `svelteVisualizer.terminalPathPrefix` to control prefix behavior:
+  - `"@"` (default): `@src/lib/Button.svelte`
+  - `""` (empty): `src/lib/Button.svelte` (useful for tools like Aider)
 
 ### Node Colors and Types
 
@@ -189,7 +198,7 @@ npm run package
 
 - Check your `svelteVisualizer.componentPaths` and `svelteVisualizer.routePaths` settings
 - Make sure the glob patterns match your project structure
-- Try clicking "Refresh Graph" after changing settings
+- Run `Svelte: Refresh Component Graph` after changing settings
 - Verify files are not in excluded directories (node_modules, .svelte-kit, build, dist)
 
 ### Graph looks cluttered?
@@ -209,14 +218,9 @@ npm run package
 - The graph border should turn blue when Shift is held
 - Without Shift, the file will open in the editor instead of focusing in the visualizer
 
-## Release Notes
+## Changelog
 
-### 0.2.0
-
-- Legend filter toggles — click legend items to show/hide node types (parents, children, routes, unused imports)
-- Improved dashed link visibility on dark themes
-- Keyboard focus ring on legend toggle buttons
-- Dependency updates
+See [CHANGELOG.md](./CHANGELOG.md) for release history.
 
 
 ## Contributing
