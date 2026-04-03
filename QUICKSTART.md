@@ -64,9 +64,12 @@ Edit your workspace or user settings:
   "svelteVisualizer.routePaths": [
     "src/routes/**/*.svelte"
   ],
-  "svelteVisualizer.routesBasePath": "src/routes"
+  "svelteVisualizer.routesBasePath": "src/routes",
+  "svelteVisualizer.terminalPathPrefix": "@"
 }
 ```
+
+To insert plain paths (for tools like Aider), set `"svelteVisualizer.terminalPathPrefix": ""`.
 
 ## Development Tips
 

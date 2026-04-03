@@ -43,7 +43,55 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
-    context.subscriptions.push(showGraphCommand, refreshGraphCommand, showComponentInGraphCommand);
+    const insertFilePathInTerminalCommand = vscode.commands.registerCommand(
+        'svelteVisualizer.insertFilePathInTerminal',
+        async (uri?: vscode.Uri) => {
+            const targetUri = uri ?? vscode.window.activeTextEditor?.document.uri;
+            await insertFileReferenceInTerminal(targetUri);
+        }
+    );
+
+    context.subscriptions.push(
+        showGraphCommand,
+        refreshGraphCommand,
+        showComponentInGraphCommand,
+        insertFilePathInTerminalCommand
+    );
+}
+
+function getTerminalFileReference(fileUri: vscode.Uri): string | null {
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(fileUri);
+    if (!workspaceFolder) {
+        return null;
+    }
+
+    const config = vscode.workspace.getConfiguration('svelteVisualizer');
+    const configuredPrefix = config.get<string>('terminalPathPrefix') ?? '@';
+    const prefix = configuredPrefix.trim();
+    const relativePath = path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath);
+    const normalizedRelativePath = relativePath.replace(/\\/g, '/');
+    return `${prefix}${normalizedRelativePath}`;
+}
+
+async function insertFileReferenceInTerminal(fileUri: vscode.Uri | undefined) {
+    if (!fileUri || fileUri.scheme !== 'file') {
+        vscode.window.showWarningMessage('No file selected to insert into terminal');
+        return;
+    }
+
+    const terminalFileReference = getTerminalFileReference(fileUri);
+    if (!terminalFileReference) {
+        vscode.window.showWarningMessage('Selected file is not inside an open workspace');
+        return;
+    }
+
+    const terminal = vscode.window.activeTerminal;
+    if (!terminal) {
+        vscode.window.showWarningMessage('No active terminal session. Focus your Copilot/Claude terminal and try again.');
+        return;
+    }
+
+    terminal.sendText(`${terminalFileReference} `, false);
 }
 
 async function showVisualizerPanel(context: vscode.ExtensionContext) {
@@ -94,6 +142,9 @@ async function showVisualizerPanel(context: vscode.ExtensionContext) {
                         break;
                     case 'copyFilePath':
                         await copyComponentFilePath(message.componentName, message.nodeType);
+                        break;
+                    case 'insertFilePathInTerminal':
+                        await insertComponentFilePathInTerminal(message.componentName, message.nodeType);
                         break;
                 }
             },
@@ -429,6 +480,16 @@ async function copyComponentFilePath(componentName: string, nodeType: string) {
     }
 }
 
+async function insertComponentFilePathInTerminal(componentName: string, nodeType: string) {
+    const fileUri = await findComponentFileUri(componentName, nodeType);
+    if (!fileUri) {
+        vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
+        return;
+    }
+
+    await insertFileReferenceInTerminal(fileUri);
+}
+
 function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Webview): string {
     const tokensUri = webview.asWebviewUri(
         vscode.Uri.file(path.join(context.extensionPath, 'webview', 'tokens', 'design-tokens.css'))
@@ -630,6 +691,15 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
               <li>Click legend items to toggle visibility of node types (Parent, Child, Route, Unused Import)</li>
             </ul>
           </section>
+
+          <section class="help-section">
+            <h3>Terminal File References</h3>
+            <ul>
+              <li>Right-click a node and choose <strong>"Insert File Path in Terminal"</strong> to paste its path into the active terminal session</li>
+              <li>Use command palette or file context menus for non-graph files: <strong>"Svelte: Insert File Path in Terminal"</strong></li>
+              <li>Configure prefix in settings with <code>svelteVisualizer.terminalPathPrefix</code> (default <code>"@"</code>; set <code>""</code> for plain paths)</li>
+            </ul>
+          </section>
         </div>
       </div>
     </div>
@@ -651,6 +721,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <div class="context-menu-separator"></div>
       <div class="context-menu-item" data-action="copyName">Copy File Name</div>
       <div class="context-menu-item" data-action="copyPath">Copy File Path</div>
+      <div class="context-menu-item" data-action="sendToTerminal">Insert File Path in Terminal</div>
     </div>
 
     <script>

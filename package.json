@@ -2,7 +2,7 @@
   "name": "svelte-component-visualizer",
   "displayName": "Svelte Component Visualizer",
   "description": "Visualize Svelte component dependencies as an interactive graph",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "publisher": "jamcgrath",
   "license": "MIT",
   "icon": "icon.png",
@@ -47,6 +47,11 @@
       {
         "command": "svelteVisualizer.showComponentInGraph",
         "title": "Open in Component Visualizer"
+      },
+      {
+        "command": "svelteVisualizer.insertFilePathInTerminal",
+        "title": "Svelte: Insert File Path in Terminal",
+        "icon": "$(terminal)"
       }
     ],
     "menus": {
@@ -55,6 +60,11 @@
           "command": "svelteVisualizer.showComponentInGraph",
           "when": "resourceExtname == .svelte",
           "group": "navigation@10"
+        },
+        {
+          "command": "svelteVisualizer.insertFilePathInTerminal",
+          "when": "resourceScheme == file",
+          "group": "navigation@11"
         }
       ],
       "editor/title/context": [
@@ -62,6 +72,11 @@
           "command": "svelteVisualizer.showComponentInGraph",
           "when": "resourceExtname == .svelte",
           "group": "navigation@10"
+        },
+        {
+          "command": "svelteVisualizer.insertFilePathInTerminal",
+          "when": "resourceScheme == file",
+          "group": "navigation@11"
         }
       ]
     },
@@ -114,6 +129,11 @@
           ],
           "default": "auto",
           "description": "Color scheme for the visualizer. 'auto' follows VS Code's theme"
+        },
+        "svelteVisualizer.terminalPathPrefix": {
+          "type": "string",
+          "default": "@",
+          "description": "Prefix for file references inserted into terminal (e.g., '@', '#', or empty for plain paths)"
         }
       }
     }
@@ -142,6 +162,6 @@
     "d3": "^7.9.0",
     "estree-walker": "^3.0.3",
     "glob": "^11.0.0",
-    "svelte": "^5.39.11"
+    "svelte": "^5.55.1"
   }
 }

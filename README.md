@@ -93,7 +93,8 @@ Configure the extension through VSCode settings (`Cmd+,` / `Ctrl+,`):
   ],
   "svelteVisualizer.routesBasePath": "src/routes",
   "svelteVisualizer.theme": "modern",
-  "svelteVisualizer.colorScheme": "auto"
+  "svelteVisualizer.colorScheme": "auto",
+  "svelteVisualizer.terminalPathPrefix": "@"
 }
 ```
 
@@ -131,6 +132,11 @@ Configure the extension through VSCode settings (`Cmd+,` / `Ctrl+,`):
     - `"auto"` - Follows VS Code's theme (default)
     - `"light"` - Always use light mode
     - `"dark"` - Always use dark mode
+
+- `svelteVisualizer.terminalPathPrefix` (string)
+  - Prefix used when inserting file references into terminal
+  - Default: `"@"`
+  - Set to `""` (empty string) to insert plain paths (useful for tools like Aider)
 
 ## Requirements
 

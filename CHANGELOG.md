@@ -5,6 +5,22 @@ All notable changes to the Svelte Component Visualizer extension will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-04-03
+
+### Added
+
+- Terminal file path insertion command: `Svelte: Insert File Path in Terminal`
+- Explorer and editor context menu actions for terminal file path insertion
+- Visualizer node context menu action: `Insert File Path in Terminal`
+- Configurable terminal prefix via `svelteVisualizer.terminalPathPrefix` (default `@`, empty string for plain paths)
+- Updated in-UI help dialog with terminal file reference instructions
+
+### Changed
+
+- Terminal insertion now targets only the active terminal session
+- Terminal insertion is silent (no success toast), with warnings only for missing prerequisites
+- File reference format now uses configurable `<prefix><relative/path>` (default `@path/to/file`)
+
 ## [0.1.0] - 2025-10-19
 
 ### Added
@@ -38,3 +54,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drag and drop not supported in browser-based VSCode environments (Code OSS, vscode.dev, GitHub Codespaces)
 
 [0.1.0]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/v0.1.0
+[0.3.0]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/v0.3.0

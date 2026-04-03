@@ -876,6 +876,14 @@ contextMenu.selectAll(".context-menu-item").on("click", function() {
         nodeType: contextMenuData.type
       });
       break;
+
+    case "sendToTerminal":
+      vscode.postMessage({
+        command: 'insertFilePathInTerminal',
+        componentName: contextMenuData.id,
+        nodeType: contextMenuData.type
+      });
+      break;
   }
 
   hideContextMenu();
