@@ -21,6 +21,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Terminal insertion is silent (no success toast), with warnings only for missing prerequisites
 - File reference format now uses configurable `<prefix><relative/path>` (default `@path/to/file`)
 
+## [0.2.1] - 2025-10-19
+
+### Changed
+
+- Documentation and packaging updates for the 0.2.x line
+- Dependency lockfile updates
+
+## [0.2.0] - 2025-10-19
+
+### Added
+
+- Interactive legend filters: click legend items to show/hide node categories (parents, children, routes, unused imports)
+- Improved keyboard accessibility for legend controls
+
+### Changed
+
+- Parent/child node classification and focus behavior improvements
+- Visual polish updates for graph styling and link color contrast
+- README updates for 0.2.0 behavior
+
 ## [0.1.0] - 2025-10-19
 
 ### Added
@@ -54,4 +74,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Drag and drop not supported in browser-based VSCode environments (Code OSS, vscode.dev, GitHub Codespaces)
 
 [0.1.0]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/v0.1.0
+[0.2.0]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/0.2.0
+[0.2.1]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/v0.2.1
 [0.3.0]: https://github.com/jamcgrath/svelte-component-visualizer/releases/tag/v0.3.0
