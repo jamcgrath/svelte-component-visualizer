@@ -21,14 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Terminal insertion is silent (no success toast), with warnings only for missing prerequisites
 - File reference format now uses configurable `<prefix><relative/path>` (default `@path/to/file`)
 
-## [0.2.1] - 2025-10-19
+## [0.2.1] - 2026-02-28
 
 ### Changed
 
 - Documentation and packaging updates for the 0.2.x line
 - Dependency lockfile updates
 
-## [0.2.0] - 2025-10-19
+## [0.2.0] - 2026-02-28
 
 ### Added
 
