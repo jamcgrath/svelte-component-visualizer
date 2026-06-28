@@ -15,10 +15,9 @@ let showPathOnHover = true; // Setting: short label on the node + full label on 
 
 // --- Display labels ---
 // Node ids are workspace-relative paths (e.g. "src/lib/Button.svelte"). Components show their
-// basename; routes show the human-readable "(page) /path" form derived from the path. When two
-// nodes would render the same label, a minimal distinguishing directory suffix is appended.
-// Labels are computed once per graph load into `labelById`; selection and filtering always use
-// the id, never the label.
+// basename; routes show the human-readable "(page) /path" form derived from the path. Same-named
+// files share a label by design — they are still distinct nodes (by path id), and the full path is
+// shown on hover (see showPathOnHover). Selection and filtering always use the id, never the label.
 function basename(id) {
   const seg = id.split('/').pop() || id;
   return seg.endsWith('.svelte') ? seg.slice(0, -'.svelte'.length) : seg;
@@ -54,69 +53,16 @@ function deriveRouteLabel(id, base) {
   return `${fileType} ${dir && dir !== '.' ? dir : '/'}`;
 }
 
-// The base (pre-disambiguation) label for a node: basename for components, derived path for routes.
+// The label shown for a node: basename for components, derived path for routes. Same-named files
+// are kept as distinct nodes by their path id; they intentionally share a label here, and the full
+// path is available on hover (see showPathOnHover) to tell them apart when needed.
 function baseLabel(node) {
   return node.type === 'route' ? deriveRouteLabel(node.id, routesBasePath) : basename(node.id);
 }
 
-// Directory segments of an id, excluding the filename.
-function dirSegments(id) {
-  const parts = id.split('/');
-  parts.pop();
-  return parts;
-}
-
-// Final display label per node id, computed once when graph data arrives. Nodes whose base label
-// is unique keep it; colliding nodes (including two routes that derive the same label) are
-// qualified with only the part of their path that actually DIFFERS from the others in the group —
-// the directory shared by all (common prefix and suffix) is stripped, so a monorepo collision that
-// differs only in the app folder reads "Banner (pages-mamamia-com-au)", not the whole path.
-let labelById = new Map();
-
-function computeLabels(nodes) {
-  labelById = new Map();
-  const groups = new Map();
-  for (const n of nodes) {
-    const b = baseLabel(n);
-    const group = groups.get(b);
-    if (group) group.push(n); else groups.set(b, [n]);
-  }
-  for (const [base, group] of groups) {
-    if (group.length === 1) {
-      labelById.set(group[0].id, base);
-      continue;
-    }
-    const segsList = group.map((n) => dirSegments(n.id));
-    const minLen = Math.min(...segsList.map((s) => s.length));
-
-    // Longest run of leading directory segments shared by every node in the group.
-    let prefixLen = 0;
-    while (prefixLen < minLen && segsList.every((s) => s[prefixLen] === segsList[0][prefixLen])) {
-      prefixLen++;
-    }
-    // Longest run of trailing segments shared by all, without overlapping the common prefix.
-    let suffixLen = 0;
-    while (
-      suffixLen < minLen - prefixLen &&
-      segsList.every((s) => s[s.length - 1 - suffixLen] === segsList[0][segsList[0].length - 1 - suffixLen])
-    ) {
-      suffixLen++;
-    }
-    // Each node's qualifier is the differing middle. It is unique within the group (two equal
-    // middles would mean identical paths), and empty for at most one node (rendered bare).
-    group.forEach((n, i) => {
-      const middle = segsList[i].slice(prefixLen, segsList[i].length - suffixLen).join('/');
-      labelById.set(n.id, middle ? `${base} (${middle})` : base);
-    });
-  }
-}
-
-function displayLabel(node) {
-  return labelById.get(node.id) || baseLabel(node);
-}
-
 function labelForId(id) {
-  return labelById.get(id) || basename(id);
+  const node = fullGraphData && fullGraphData.nodes.find((n) => n.id === id);
+  return node ? baseLabel(node) : basename(id);
 }
 
 // Per-category visibility toggles (legend filters)
@@ -188,19 +134,15 @@ window.addEventListener('message', event => {
   } else if (message.command === 'focusComponent') {
     focusOnComponent(message.componentName, message.nodeType);
   } else if (message.command === 'setOptions') {
-    // Display-only toggle from settings — re-render the current view without a re-scan.
+    // Settings toggle — read live at hover time, so no re-render is needed.
     if (message.showPathOnHover !== undefined) {
       showPathOnHover = message.showPathOnHover;
-    }
-    if (fullGraphData) {
-      updateGraph(currentSelectedId);
     }
   }
 });
 
 function initializeGraph(graph) {
   fullGraphData = graph;
-  computeLabels(graph.nodes);
   const allSortedNodes = [...graph.nodes].sort((a, b) => a.id.localeCompare(b.id));
   sortedComponents = allSortedNodes.filter(n => n.type === 'component');
   sortedRoutes = allSortedNodes.filter(n => n.type === 'route');
@@ -240,7 +182,7 @@ function populateResults(listElement, nodes, inputElement, clearBtnElement) {
       .attr("role", "option")
       .attr("id", `${listElement.attr("id")}-option-${index}`)
       .attr("data-node-id", node.id)
-      .text(displayLabel(node))
+      .text(baseLabel(node))
       .on("click", () => {
         selectOption(node.id, inputElement, listElement, clearBtnElement);
       });
@@ -454,15 +396,14 @@ function updateGraph(selectedId) {
       showNodeContextMenu(event, d);
     })
     .on("mousemove", (event, d) => {
-      // Reveal the full disambiguated label on hover (only when showPathOnHover is enabled and
-      // the full label differs from the short label on the canvas). Follows the cursor; instant.
-      const full = displayLabel(d);
-      if (!showPathOnHover || full === baseLabel(d)) {
+      // Reveal the node's full workspace-relative path on hover (when showPathOnHover is enabled),
+      // so same-named nodes can be told apart. Follows the cursor; shows instantly, no native delay.
+      if (!showPathOnHover) {
         graphTooltip.style("display", "none");
         return;
       }
       graphTooltip
-        .text(full)
+        .text(d.id)
         .style("display", "block")
         .style("left", `${event.clientX + 12}px`)
         .style("top", `${event.clientY + 12}px`);
@@ -485,7 +426,7 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => (showPathOnHover ? baseLabel(d) : displayLabel(d)))
+    .text((d) => baseLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
     .attr("y", 3);
@@ -755,7 +696,7 @@ function setupCombobox(input, list, clearBtn, sourceData) {
     const searchTerm = input.property("value").toLowerCase();
     const filteredNodes = sourceData.filter((node) =>
       node.id.toLowerCase().includes(searchTerm) ||
-      displayLabel(node).toLowerCase().includes(searchTerm)
+      baseLabel(node).toLowerCase().includes(searchTerm)
     );
     populateResults(list, filteredNodes, input, clearBtn);
     list.style("display", "block");

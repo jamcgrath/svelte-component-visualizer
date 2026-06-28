@@ -154,9 +154,9 @@ Configure the extension through VSCode settings (`Cmd+,` / `Ctrl+,`):
   - Set to `""` (empty string) to insert plain paths (useful for tools like Aider)
 
 - `svelteVisualizer.showPathOnHover` (boolean)
-  - When a node's name is shared by another file, show just the short name on the graph and reveal the full disambiguated label on hover
+  - Show a node's full file path in a tooltip when you hover it (handy for telling apart same-named files)
   - Default: `true`
-  - Disable to show the full label inline on the node instead (no hover needed)
+  - Disable to turn off the hover tooltip
 
 ## Requirements
 

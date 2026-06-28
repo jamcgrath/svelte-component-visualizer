@@ -146,7 +146,7 @@
         "svelteVisualizer.showPathOnHover": {
           "type": "boolean",
           "default": true,
-          "description": "When a node's name is shared by another file, show just the short name on the graph and reveal the full disambiguated label on hover. Disable to show the full label inline on the node instead."
+          "description": "Show a node's full file path in a tooltip when you hover it (handy for telling apart same-named files). Disable to turn off the hover tooltip."
         }
       }
     }
