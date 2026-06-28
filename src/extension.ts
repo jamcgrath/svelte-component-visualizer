@@ -193,9 +193,10 @@ function fileToNodeId(fsPath: string): string | null {
  * box (component vs route) to populate when focusing.
  */
 function getNodeTypeFromPath(fsPath: string, routesBasePath: string): 'component' | 'route' {
+    // Plain substring test (not a RegExp) so a routesBasePath with regex
+    // metacharacters can never throw or alter matching. Mirrors graphGenerator's getNodeType.
     const normalized = fsPath.replace(/\\/g, '/');
-    const routesMatch = normalized.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-    if (routesMatch) {
+    if (normalized.includes(`/${routesBasePath}/`)) {
         const fileName = path.basename(fsPath);
         if (fileName.startsWith('+page') || fileName.startsWith('+layout') || fileName.startsWith('+error')) {
             return 'route';

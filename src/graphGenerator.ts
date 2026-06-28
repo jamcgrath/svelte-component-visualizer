@@ -51,9 +51,10 @@ function resolveImportId(specifier: string, importingFileAbs: string, workspaceR
  * every other `.svelte` file (including components living inside the routes folder) is a component.
  */
 function getNodeType(file: string, routesBasePath: string): 'component' | 'route' {
+    // Plain substring test (not a RegExp) so a routesBasePath containing regex
+    // metacharacters can never throw or alter matching.
     const normalizedFile = file.replace(/\\/g, '/');
-    const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-    if (routesMatch) {
+    if (normalizedFile.includes(`/${routesBasePath}/`)) {
         const fileName = path.basename(file);
         if (fileName.startsWith('+page') || fileName.startsWith('+layout') || fileName.startsWith('+error')) {
             return 'route';
@@ -75,14 +76,15 @@ interface ParseResult {
 
 const parseCache = new Map<string, { mtimeMs: number; parsed: ParseResult }>();
 
-/** Drop a single file's cached parse (called by the extension's file-system watcher). */
-export function invalidateParseCache(absPath: string): void {
-    parseCache.delete(absPath);
+// Cache keys are normalized to POSIX separators so the glob-produced paths used when
+// populating the cache and the `uri.fsPath` used to invalidate it match on Windows too.
+function cacheKey(p: string): string {
+    return p.replace(/\\/g, '/');
 }
 
-/** Clear the whole parse cache (e.g. on workspace change). */
-export function clearParseCache(): void {
-    parseCache.clear();
+/** Drop a single file's cached parse (called by the extension's file-system watcher). */
+export function invalidateParseCache(absPath: string): void {
+    parseCache.delete(cacheKey(absPath));
 }
 
 function parseSvelteFile(file: string, workspacePath: string): ParseResult {
@@ -154,13 +156,14 @@ function getParsedFile(file: string, workspacePath: string): ParseResult {
         return { importsByLocal: {}, usedLocals: new Set() };
     }
 
-    const cached = parseCache.get(file);
+    const key = cacheKey(file);
+    const cached = parseCache.get(key);
     if (cached && cached.mtimeMs === mtimeMs) {
         return cached.parsed;
     }
 
     const parsed = parseSvelteFile(file, workspacePath);
-    parseCache.set(file, { mtimeMs, parsed });
+    parseCache.set(key, { mtimeMs, parsed });
     return parsed;
 }
 

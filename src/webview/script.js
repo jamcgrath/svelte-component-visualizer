@@ -28,9 +28,20 @@ function posixDirname(s) {
 
 // Mirrors graphGenerator's original route-naming scheme so labels are unchanged from before.
 function deriveRouteLabel(id, base) {
+  // Locate the routes base segment with plain string ops (not a RegExp) so a base
+  // containing regex metacharacters can never throw or mis-match. Matches the base at
+  // the start of the id or after a slash, mirroring the old `(?:^|/)` anchor.
   const normalized = id.replace(/\\/g, '/');
-  const match = normalized.match(new RegExp(`(?:^|/)(${base})/(.*)$`));
-  const afterBase = match ? match[2] : normalized;
+  const marker = `/${base}/`;
+  const idx = normalized.indexOf(marker);
+  let afterBase;
+  if (idx >= 0) {
+    afterBase = normalized.slice(idx + marker.length);
+  } else if (normalized.startsWith(`${base}/`)) {
+    afterBase = normalized.slice(base.length + 1);
+  } else {
+    afterBase = normalized;
+  }
   const fileName = afterBase.split('/').pop() || '';
   let fileType = '';
   if (fileName.startsWith('+page')) fileType = '(page)';
@@ -222,6 +233,11 @@ function updateLegendVisibility(isFocusedView) {
 }
 
 function updateGraph(selectedId) {
+  // Guard against a focusComponent message arriving before the first updateGraph
+  // has populated the data (ordering is normally guaranteed, but don't deref null).
+  if (!fullGraphData) {
+    return;
+  }
   updateLegendVisibility(!!selectedId);
   svg.selectAll("g.graph-group").remove(); // Clear previous graph
 
