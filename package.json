@@ -2,7 +2,7 @@
   "name": "svelte-component-visualizer",
   "displayName": "Svelte Component Visualizer",
   "description": "Visualize Svelte component dependencies as an interactive graph",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "jamcgrath",
   "license": "MIT",
   "icon": "icon.png",

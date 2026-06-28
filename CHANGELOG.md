@@ -5,6 +5,25 @@ All notable changes to the Svelte Component Visualizer extension will be documen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-28
+
+### Added
+
+- Named `.svelte` imports are now tracked as dependencies (previously only default imports were)
+- `<svelte:component this={Component}>` dynamic usage is tracked when `this` is a direct component identifier
+- `svelteVisualizer.unconditionalDependencyPaths` setting (array of glob patterns): files matching a pattern treat all of their `.svelte` imports as dependencies regardless of template usage — useful for dynamic renderer components
+- Incremental parsing: per-file parse results are cached by mtime and a `.svelte` file watcher invalidates them, so refreshes only re-parse files that actually changed
+
+### Changed
+
+- Graph node ids are now workspace-relative file paths instead of basenames, so two same-named components (e.g. two `Button.svelte` in different folders) no longer collapse into a single node with misrouted edges
+- Colliding display labels are disambiguated with a parent-directory suffix (e.g. `Button (lib)` / `Button (widgets)`); unique names are unchanged
+- Bumped Svelte to 5.56.4
+
+### Removed
+
+- The implicit "renderer" filename heuristic (any file with "renderer" in its path). Files that need all imports treated as dependencies must now be listed explicitly via `svelteVisualizer.unconditionalDependencyPaths`
+
 ## [0.3.0] - 2026-04-03
 
 ### Added

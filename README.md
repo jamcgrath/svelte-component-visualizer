@@ -9,6 +9,7 @@ A VSCode extension that visualizes Svelte component dependencies as an interacti
 - Interactive Dependency Graph - Visualize all component relationships in your Svelte project
 - Component and Route Search - Quickly find and focus on specific components or SvelteKit routes
 - Multiple Visual Themes - Choose from modern, flat, retro, or retro-alt themes with light/dark modes
+- Dependency Detection - Tracks default and named `.svelte` imports, including dynamic `<svelte:component this={Component}>` usage
 - Unused Import Detection - Identify imported but unused components (shown with orange dashed borders)
 - Legend Filters - Click legend items to show/hide specific node types (parents, children, routes, unused imports)
 - Drag and Drop Support - Drag .svelte files from Explorer onto the graph to focus on them
@@ -125,6 +126,11 @@ Configure the extension through VSCode settings (`Cmd+,` / `Ctrl+,`):
   - Default: `"routes"`
   - The extension searches for this directory name anywhere in your project
 
+- `svelteVisualizer.unconditionalDependencyPaths` (array)
+  - Glob patterns (matched against each file's workspace-relative path). Matching files treat **all** of their `.svelte` imports as dependencies, regardless of whether the component appears in the template — useful for dynamic renderer components that resolve children at runtime
+  - Default: `[]`
+  - Example: `["src/lib/renderers/**/*.svelte"]`
+
 #### Visual Appearance
 
 - `svelteVisualizer.theme` (string)
@@ -187,9 +193,8 @@ npm run package
 
 ## Known Issues
 
-- Graph generation may be slow for very large projects (500+ components)
-- Only supports default component imports (not named imports like `import { Component } from './file.svelte'`)
-- Dynamic imports via `<svelte:component>` are not tracked
+- The first graph generation on very large projects may take a moment (subsequent refreshes are incremental — only changed files are re-parsed)
+- `<svelte:component this={Expr}>` is only tracked when `Expr` is a direct component identifier (computed or conditional targets are not resolved)
 - **Drag and drop not supported in browser-based VSCode** (Code OSS, vscode.dev, GitHub Codespaces, cloud workstations) - This is a limitation of webviews in browser environments. Use the context menu "Open in Component Visualizer" instead.
 
 ## Troubleshooting
