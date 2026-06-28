@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { generateComponentGraph } from './graphGenerator';
+import { generateComponentGraph, invalidateParseCache, toNodeId, getNodeType } from './graphGenerator';
 
 let currentPanel: vscode.WebviewPanel | undefined;
 
@@ -12,6 +12,14 @@ export function activate(context: vscode.ExtensionContext) {
         if (e.affectsConfiguration('svelteVisualizer.theme') ||
             e.affectsConfiguration('svelteVisualizer.colorScheme')) {
             updateWebviewTheme();
+        }
+        if (e.affectsConfiguration('svelteVisualizer.showPathOnHover') && currentPanel) {
+            // Display-only toggle: re-render from the data the webview already has, no re-scan.
+            const config = vscode.workspace.getConfiguration('svelteVisualizer');
+            currentPanel.webview.postMessage({
+                command: 'setOptions',
+                showPathOnHover: config.get<boolean>('showPathOnHover') ?? true
+            });
         }
     });
 
@@ -51,11 +59,20 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    // Invalidate cached parses when .svelte files change on disk, so the next refresh
+    // re-parses only what actually changed. (The generator's mtime check is the correctness
+    // guarantee; this watcher keeps the cache tidy and drops entries for deleted files.)
+    const svelteWatcher = vscode.workspace.createFileSystemWatcher('**/*.svelte');
+    svelteWatcher.onDidChange(uri => invalidateParseCache(uri.fsPath));
+    svelteWatcher.onDidCreate(uri => invalidateParseCache(uri.fsPath));
+    svelteWatcher.onDidDelete(uri => invalidateParseCache(uri.fsPath));
+
     context.subscriptions.push(
         showGraphCommand,
         refreshGraphCommand,
         showComponentInGraphCommand,
-        insertFilePathInTerminalCommand
+        insertFilePathInTerminalCommand,
+        svelteWatcher
     );
 }
 
@@ -166,6 +183,18 @@ async function showVisualizerPanel(context: vscode.ExtensionContext) {
     }
 }
 
+/**
+ * Canonical node id for a file: workspace-relative, POSIX-separated path. Delegates to
+ * graphGenerator's `toNodeId` so file->id and id->file round-trip exactly (single source of truth).
+ */
+function fileToNodeId(fsPath: string): string | null {
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+        return null;
+    }
+    return toNodeId(fsPath, workspaceFolder.uri.fsPath);
+}
+
 async function showComponentInVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri) {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
 
@@ -174,39 +203,16 @@ async function showComponentInVisualizer(context: vscode.ExtensionContext, uri: 
         return;
     }
 
-    // Determine component name and type from file path
+    // Determine component id and type from file path
     const config = vscode.workspace.getConfiguration('svelteVisualizer');
     const routesBasePath = config.get<string>('routesBasePath') || 'routes';
     const filePath = uri.fsPath;
 
-    let componentName: string;
-    let nodeType: 'component' | 'route';
-
-    // Check if this file is in a routes directory
-    const normalizedFile = filePath.replace(/\\/g, '/');
-    const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-    if (routesMatch) {
-        const routePath = path.dirname(routesMatch[2]);
-        const fileName = path.basename(filePath);
-        let fileType = '';
-
-        if (fileName.startsWith('+page')) fileType = '(page)';
-        else if (fileName.startsWith('+layout')) fileType = '(layout)';
-        else if (fileName.startsWith('+error')) fileType = '(error)';
-
-        if (fileType) {
-            componentName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-            nodeType = 'route';
-        } else {
-            // It's a component inside the routes folder
-            componentName = path.basename(filePath, '.svelte');
-            nodeType = 'component';
-        }
-    } else {
-        componentName = path.basename(filePath, '.svelte');
-        nodeType = 'component';
+    const componentName = fileToNodeId(filePath);
+    if (!componentName) {
+        return;
     }
+    const nodeType = getNodeType(filePath, routesBasePath);
 
     // Open or reveal the visualizer panel
     await showVisualizerPanel(context);
@@ -237,38 +243,15 @@ async function focusDroppedFile(filePath: string, panel: vscode.WebviewPanel) {
         return;
     }
 
-    // Determine component name and type from file path
+    // Determine component id and type from file path
     const config = vscode.workspace.getConfiguration('svelteVisualizer');
     const routesBasePath = config.get<string>('routesBasePath') || 'routes';
 
-    let componentName: string;
-    let nodeType: 'component' | 'route';
-
-    // Check if this file is in a routes directory
-    const normalizedFile = filePath.replace(/\\/g, '/');
-    const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-    if (routesMatch) {
-        const routePath = path.dirname(routesMatch[2]);
-        const fileName = path.basename(filePath);
-        let fileType = '';
-
-        if (fileName.startsWith('+page')) fileType = '(page)';
-        else if (fileName.startsWith('+layout')) fileType = '(layout)';
-        else if (fileName.startsWith('+error')) fileType = '(error)';
-
-        if (fileType) {
-            componentName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-            nodeType = 'route';
-        } else {
-            // It's a component inside the routes folder
-            componentName = path.basename(filePath, '.svelte');
-            nodeType = 'component';
-        }
-    } else {
-        componentName = path.basename(filePath, '.svelte');
-        nodeType = 'component';
+    const componentName = fileToNodeId(filePath);
+    if (!componentName) {
+        return;
     }
+    const nodeType = getNodeType(filePath, routesBasePath);
 
     // Send focus message to webview
     panel.webview.postMessage({
@@ -311,11 +294,16 @@ async function refreshGraph(_context: vscode.ExtensionContext, panel: vscode.Web
 
     try {
         const graphData = await generateComponentGraph(workspaceFolder.uri.fsPath);
+        const config = vscode.workspace.getConfiguration('svelteVisualizer');
+        const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+        const showPathOnHover = config.get<boolean>('showPathOnHover') ?? true;
 
-        // Send graph data to webview
+        // Send graph data to webview (routesBasePath lets the webview derive route labels from path ids)
         panel.webview.postMessage({
             command: 'updateGraph',
-            data: graphData
+            data: graphData,
+            routesBasePath: routesBasePath,
+            showPathOnHover: showPathOnHover
         });
     } catch (error) {
         vscode.window.showErrorMessage(
@@ -325,118 +313,33 @@ async function refreshGraph(_context: vscode.ExtensionContext, panel: vscode.Web
 }
 
 async function openComponentFile(componentName: string, nodeType: string) {
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-
-    if (!workspaceFolder) {
+    const fileUri = await findComponentFileUri(componentName, nodeType);
+    if (!fileUri) {
+        vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
         return;
     }
-
-    const config = vscode.workspace.getConfiguration('svelteVisualizer');
-    const routesBasePath = config.get<string>('routesBasePath') || 'routes';
-    let searchPatterns: string[];
-
-    if (nodeType === 'route') {
-        searchPatterns = config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'];
-    } else {
-        searchPatterns = [
-            ...(config.get<string[]>('componentPaths') || ['**/*.svelte']),
-            ...(config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'])
-        ];
-    }
-
-    // Search for the component file
-    for (const pattern of searchPatterns) {
-        const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
-
-        for (const file of files) {
-            const fileName = path.basename(file.fsPath, '.svelte');
-
-            // For routes, match the full route name format
-            if (nodeType === 'route') {
-                const normalizedFile = file.fsPath.replace(/\\/g, '/');
-                const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-                if (routesMatch) {
-                    const routePath = path.dirname(routesMatch[2]);
-                    const baseName = path.basename(file.fsPath);
-
-                    let fileType = '';
-                    if (baseName.startsWith('+page')) fileType = '(page)';
-                    else if (baseName.startsWith('+layout')) fileType = '(layout)';
-                    else if (baseName.startsWith('+error')) fileType = '(error)';
-
-                    const routeName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-
-                    if (routeName === componentName) {
-                        const document = await vscode.workspace.openTextDocument(file);
-                        await vscode.window.showTextDocument(document);
-                        return;
-                    }
-                }
-            } else if (fileName === componentName) {
-                const document = await vscode.workspace.openTextDocument(file);
-                await vscode.window.showTextDocument(document);
-                return;
-            }
-        }
-    }
-
-    vscode.window.showWarningMessage(`Could not find file for component: ${componentName}`);
+    const document = await vscode.workspace.openTextDocument(fileUri);
+    await vscode.window.showTextDocument(document);
 }
 
-async function findComponentFileUri(componentName: string, nodeType: string): Promise<vscode.Uri | null> {
+/**
+ * Resolve a node id (a workspace-relative POSIX path) back to its file Uri. With path-based ids
+ * this is a direct join + existence check — no glob search or route-name reconstruction needed.
+ * `nodeType` is retained for call-site compatibility but no longer affects resolution.
+ */
+async function findComponentFileUri(componentName: string, _nodeType: string): Promise<vscode.Uri | null> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         return null;
     }
 
-    const config = vscode.workspace.getConfiguration('svelteVisualizer');
-    const routesBasePath = config.get<string>('routesBasePath') || 'routes';
-    let searchPatterns: string[];
-
-    if (nodeType === 'route') {
-        searchPatterns = config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'];
-    } else {
-        searchPatterns = [
-            ...(config.get<string[]>('componentPaths') || ['**/*.svelte']),
-            ...(config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'])
-        ];
+    const candidate = vscode.Uri.joinPath(workspaceFolder.uri, ...componentName.split('/'));
+    try {
+        await vscode.workspace.fs.stat(candidate);
+        return candidate;
+    } catch {
+        return null;
     }
-
-    // Search for the component file
-    for (const pattern of searchPatterns) {
-        const files = await vscode.workspace.findFiles(pattern, '**/node_modules/**');
-
-        for (const file of files) {
-            const fileName = path.basename(file.fsPath, '.svelte');
-
-            // For routes, match the full route name format
-            if (nodeType === 'route') {
-                const normalizedFile = file.fsPath.replace(/\\/g, '/');
-                const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-                if (routesMatch) {
-                    const routePath = path.dirname(routesMatch[2]);
-                    const baseName = path.basename(file.fsPath);
-
-                    let fileType = '';
-                    if (baseName.startsWith('+page')) fileType = '(page)';
-                    else if (baseName.startsWith('+layout')) fileType = '(layout)';
-                    else if (baseName.startsWith('+error')) fileType = '(error)';
-
-                    const routeName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-
-                    if (routeName === componentName) {
-                        return file;
-                    }
-                }
-            } else if (fileName === componentName) {
-                return file;
-            }
-        }
-    }
-
-    return null;
 }
 
 async function revealComponentInExplorer(componentName: string, nodeType: string) {
@@ -573,13 +476,6 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
       <button id="show-all-btn">Show All Components</button>
       <button id="refresh-btn">Refresh Graph</button>
 
-      <div class="toggle-controls">
-        <label>
-          <input type="checkbox" id="show-unused-toggle" checked />
-          <span>Show Unused Imports</span>
-        </label>
-      </div>
-
       <div class="controls">
         <h2>Graph Controls</h2>
         <div>
@@ -679,7 +575,7 @@ function getWebviewContent(context: vscode.ExtensionContext, webview: vscode.Web
               <li><strong>Used dynamically</strong> - Referenced via <code>&lt;svelte:component&gt;</code>, JavaScript logic, or dynamic imports</li>
             </ul>
             <p style="font-style: italic; color: #666; font-size: 0.9em;">Always verify before removing to ensure they're not used dynamically!</p>
-            <p style="margin-top: 12px;"><strong>💡 Tip:</strong> Use the <strong>"Show Unused Imports"</strong> checkbox below the legend to toggle their visibility in the graph.</p>
+            <p style="margin-top: 12px;"><strong>💡 Tip:</strong> Click the <strong>"Unused Import"</strong> item in the legend to toggle their visibility in the graph.</p>
           </section>
 
           <section class="help-section">

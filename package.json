@@ -2,7 +2,7 @@
   "name": "svelte-component-visualizer",
   "displayName": "Svelte Component Visualizer",
   "description": "Visualize Svelte component dependencies as an interactive graph",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "jamcgrath",
   "license": "MIT",
   "icon": "icon.png",
@@ -103,6 +103,14 @@
           "default": "routes",
           "description": "Base path for routes (used for route naming). Will search for this directory name anywhere in the project."
         },
+        "svelteVisualizer.unconditionalDependencyPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Glob patterns (matched against each file's workspace-relative path). Files matching a pattern treat ALL of their .svelte imports as dependencies, regardless of whether the component appears in the template — useful for dynamic renderer components that resolve children at runtime."
+        },
         "svelteVisualizer.theme": {
           "type": "string",
           "enum": [
@@ -134,6 +142,11 @@
           "type": "string",
           "default": "@",
           "description": "Prefix for file references inserted into terminal (e.g., '@', '#', or empty for plain paths)"
+        },
+        "svelteVisualizer.showPathOnHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a node's full file path in a tooltip when you hover it (handy for telling apart same-named files). Disable to turn off the hover tooltip."
         }
       }
     }
@@ -162,6 +175,7 @@
     "d3": "^7.9.0",
     "estree-walker": "^3.0.3",
     "glob": "^11.0.0",
-    "svelte": "^5.55.1"
+    "minimatch": "^9.0.9",
+    "svelte": "^5.56.4"
   }
 }

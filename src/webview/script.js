@@ -8,8 +8,61 @@ const height = graphContainer.clientHeight;
 let fullGraphData;
 let simulation;
 let sortedComponents, sortedRoutes;
-let showUnusedImports = true;
 let currentSelectedId = null; // Track current selection for re-rendering
+let routesBasePath = 'routes'; // Sent from the extension; used to derive route labels from path ids
+let showPathOnHover = true; // Setting: short label on the node + full label on hover, vs full label inline
+
+// --- Display labels ---
+// Node ids are workspace-relative paths (e.g. "src/lib/Button.svelte"). Components show their
+// basename; routes show the human-readable "(page) /path" form derived from the path. Same-named
+// files share a label by design — they are still distinct nodes (by path id), and the full path is
+// shown on hover (see showPathOnHover). Selection and filtering always use the id, never the label.
+function basename(id) {
+  const seg = id.split('/').pop() || id;
+  return seg.endsWith('.svelte') ? seg.slice(0, -'.svelte'.length) : seg;
+}
+
+function posixDirname(s) {
+  const i = s.lastIndexOf('/');
+  return i === -1 ? '.' : s.slice(0, i);
+}
+
+function deriveRouteLabel(id, base) {
+  // Locate the routes base segment with plain string ops (not a RegExp) so a base
+  // containing regex metacharacters can never throw or mis-match. Matches the base at
+  // the start of the id or after a slash, mirroring the old `(?:^|/)` anchor.
+  const normalized = id.replace(/\\/g, '/');
+  const marker = `/${base}/`;
+  const idx = normalized.indexOf(marker);
+  let afterBase;
+  if (idx >= 0) {
+    afterBase = normalized.slice(idx + marker.length);
+  } else if (normalized.startsWith(`${base}/`)) {
+    afterBase = normalized.slice(base.length + 1);
+  } else {
+    afterBase = normalized;
+  }
+  const fileName = afterBase.split('/').pop() || '';
+  let fileType = '';
+  if (fileName.startsWith('+page')) fileType = '(page)';
+  else if (fileName.startsWith('+layout')) fileType = '(layout)';
+  else if (fileName.startsWith('+error')) fileType = '(error)';
+  const dir = posixDirname(afterBase);
+  // Root route (posixDirname returns '.') renders as '/'.
+  return `${fileType} ${dir && dir !== '.' ? dir : '/'}`;
+}
+
+// The label shown for a node: basename for components, derived path for routes. Same-named files
+// are kept as distinct nodes by their path id; they intentionally share a label here, and the full
+// path is available on hover (see showPathOnHover) to tell them apart when needed.
+function baseLabel(node) {
+  return node.type === 'route' ? deriveRouteLabel(node.id, routesBasePath) : basename(node.id);
+}
+
+function labelForId(id) {
+  const node = fullGraphData && fullGraphData.nodes.find((n) => n.id === id);
+  return node ? baseLabel(node) : basename(id);
+}
 
 // Per-category visibility toggles (legend filters)
 const categoryVisible = { parent: true, child: true, route: true, unused: true, default: true };
@@ -25,6 +78,10 @@ const linkDistanceSlider = d3.select("#link-distance");
 const chargeStrengthSlider = d3.select("#charge-strength");
 const linkDistanceValue = d3.select("#link-distance-value");
 const chargeStrengthValue = d3.select("#charge-strength-value");
+
+// Custom hover tooltip — shows the full disambiguated label instantly (the native SVG <title>
+// works but has a ~0.5s browser delay). Created once; positioned/toggled on node hover.
+const graphTooltip = d3.select("body").append("div").attr("class", "graph-tooltip");
 
 // Add arrowhead marker definition
 svg
@@ -66,9 +123,20 @@ window.addEventListener('message', event => {
   const message = event.data;
 
   if (message.command === 'updateGraph') {
+    if (message.routesBasePath) {
+      routesBasePath = message.routesBasePath;
+    }
+    if (message.showPathOnHover !== undefined) {
+      showPathOnHover = message.showPathOnHover;
+    }
     initializeGraph(message.data);
   } else if (message.command === 'focusComponent') {
     focusOnComponent(message.componentName, message.nodeType);
+  } else if (message.command === 'setOptions') {
+    // Settings toggle — read live at hover time, so no re-render is needed.
+    if (message.showPathOnHover !== undefined) {
+      showPathOnHover = message.showPathOnHover;
+    }
   }
 });
 
@@ -87,13 +155,14 @@ function initializeGraph(graph) {
 
 function focusOnComponent(componentName, nodeType) {
   // Update the appropriate search input to show the selected component
+  const label = labelForId(componentName);
   if (nodeType === 'route') {
-    routeSearchInput.property("value", componentName);
+    routeSearchInput.property("value", label);
     routeClearSearchBtn.style("display", "block");
     searchInput.property("value", "");
     clearSearchBtn.style("display", "none");
   } else {
-    searchInput.property("value", componentName);
+    searchInput.property("value", label);
     clearSearchBtn.style("display", "block");
     routeSearchInput.property("value", "");
     routeClearSearchBtn.style("display", "none");
@@ -111,7 +180,8 @@ function populateResults(listElement, nodes, inputElement, clearBtnElement) {
       .attr("class", "result-item")
       .attr("role", "option")
       .attr("id", `${listElement.attr("id")}-option-${index}`)
-      .text(node.id)
+      .attr("data-node-id", node.id)
+      .text(baseLabel(node))
       .on("click", () => {
         selectOption(node.id, inputElement, listElement, clearBtnElement);
       });
@@ -119,7 +189,7 @@ function populateResults(listElement, nodes, inputElement, clearBtnElement) {
 }
 
 function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
-  inputElement.property("value", nodeId);
+  inputElement.property("value", labelForId(nodeId));
   listElement.style("display", "none");
   inputElement.attr("aria-expanded", "false");
   if (clearBtnElement) {
@@ -136,7 +206,7 @@ function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
   }
 
   updateGraph(nodeId);
-  announceToScreenReader(`Selected ${nodeId}`);
+  announceToScreenReader(`Selected ${labelForId(nodeId)}`);
 }
 
 function updateLegendVisibility(isFocusedView) {
@@ -149,6 +219,11 @@ function updateLegendVisibility(isFocusedView) {
 }
 
 function updateGraph(selectedId) {
+  // Guard against a focusComponent message arriving before the first updateGraph
+  // has populated the data (ordering is normally guaranteed, but don't deref null).
+  if (!fullGraphData) {
+    return;
+  }
   updateLegendVisibility(!!selectedId);
   svg.selectAll("g.graph-group").remove(); // Clear previous graph
 
@@ -191,19 +266,6 @@ function updateGraph(selectedId) {
     // Full graph
     nodes = graphCopy.nodes;
     links = graphCopy.links;
-  }
-
-  // Filter unused components if toggle is off
-  if (!showUnusedImports) {
-    const unusedNodeIds = new Set(
-      nodes.filter(n => n.unused).map(n => n.id)
-    );
-    nodes = nodes.filter(n => !n.unused);
-    links = links.filter(l => {
-      const targetId = l.target.id || l.target;
-      const sourceId = l.source.id || l.source;
-      return !unusedNodeIds.has(targetId) && !unusedNodeIds.has(sourceId);
-    });
   }
 
   // Classify nodes into categories for legend filtering
@@ -336,10 +398,24 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => d.id)
+    .text((d) => baseLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
-    .attr("y", 3);
+    .attr("y", 3)
+    .on("mousemove", (event, d) => {
+      // Reveal the node's full workspace-relative path while hovering its label (when
+      // showPathOnHover is enabled), so same-named nodes can be told apart. Instant, follows cursor.
+      if (!showPathOnHover) {
+        graphTooltip.style("display", "none");
+        return;
+      }
+      graphTooltip
+        .text(d.id)
+        .style("display", "block")
+        .style("left", `${event.clientX + 12}px`)
+        .style("top", `${event.clientY + 12}px`);
+    })
+    .on("mouseout", () => graphTooltip.style("display", "none"));
 
   simulation.on("tick", () => {
     link
@@ -558,14 +634,6 @@ refreshBtn.on("click", () => {
   });
 });
 
-// Toggle for showing/hiding unused imports
-const showUnusedToggle = d3.select("#show-unused-toggle");
-showUnusedToggle.on("change", function() {
-  showUnusedImports = this.checked;
-  // Re-render graph with current selection
-  updateGraph(currentSelectedId);
-});
-
 // Legend filter toggles
 d3.selectAll(".legend-item[data-filter]").each(function() {
   const item = d3.select(this);
@@ -605,7 +673,8 @@ function setupCombobox(input, list, clearBtn, sourceData) {
 
     const searchTerm = input.property("value").toLowerCase();
     const filteredNodes = sourceData.filter((node) =>
-      node.id.toLowerCase().includes(searchTerm)
+      node.id.toLowerCase().includes(searchTerm) ||
+      baseLabel(node).toLowerCase().includes(searchTerm)
     );
     populateResults(list, filteredNodes, input, clearBtn);
     list.style("display", "block");
@@ -685,7 +754,7 @@ function setupCombobox(input, list, clearBtn, sourceData) {
         event.preventDefault();
         if (highlightedIndex >= 0 && highlightedIndex < optionsCount) {
           const selectedOption = d3.select(options.nodes()[highlightedIndex]);
-          const nodeId = selectedOption.text();
+          const nodeId = selectedOption.attr("data-node-id");
           selectOption(nodeId, input, list, clearBtn);
         }
         break;

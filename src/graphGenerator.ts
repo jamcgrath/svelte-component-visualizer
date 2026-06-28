@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
+import { Minimatch } from 'minimatch';
 import * as svelte from 'svelte/compiler';
 import { walk } from 'estree-walker';
 import * as vscode from 'vscode';
@@ -21,12 +22,180 @@ interface GraphData {
     links: GraphLink[];
 }
 
+/**
+ * Canonical node id: workspace-relative, POSIX-separated path (keeps the `.svelte` extension).
+ * This is the single source of truth so a scanned file and an import that points at it always
+ * produce the identical id string — otherwise links orphan into phantom duplicate nodes.
+ */
+export function toNodeId(absPath: string, workspaceRoot: string): string {
+    return path.relative(workspaceRoot, absPath).split(path.sep).join('/');
+}
+
+/**
+ * Resolve an import specifier (as written in source) to the same canonical id its target file
+ * would get when scanned. Handles relative specifiers and SvelteKit's `$lib` alias; anything
+ * else falls back to a best-effort id (a leaf node with no outgoing edges).
+ */
+function resolveImportId(specifier: string, importingFileAbs: string, workspaceRoot: string): string {
+    if (specifier.startsWith('./') || specifier.startsWith('../')) {
+        return toNodeId(path.resolve(path.dirname(importingFileAbs), specifier), workspaceRoot);
+    }
+    if (specifier.startsWith('$lib/')) {
+        const rest = specifier.slice('$lib/'.length);
+        // $lib points at the `src/lib` of the SvelteKit project the importing file belongs to.
+        // In a monorepo the file lives in a sub-package, so derive that package's src dir from the
+        // file's own path (its last `/src/` segment) rather than assuming the workspace root.
+        const normalized = importingFileAbs.replace(/\\/g, '/');
+        const srcIdx = normalized.lastIndexOf('/src/');
+        const libBase = srcIdx !== -1
+            ? `${normalized.slice(0, srcIdx)}/src/lib`
+            : `${workspaceRoot.replace(/\\/g, '/')}/src/lib`;
+        return toNodeId(`${libBase}/${rest}`, workspaceRoot);
+    }
+    return specifier.replace(/^\.\//, '');
+}
+
+/**
+ * A node is a `route` only when it is a +page/+layout/+error file under the routes base path;
+ * every other `.svelte` file (including components living inside the routes folder) is a component.
+ * Exported so the extension host reuses this exact logic instead of re-implementing it.
+ */
+export function getNodeType(file: string, routesBasePath: string): 'component' | 'route' {
+    // Plain substring test (not a RegExp) so a routesBasePath containing regex
+    // metacharacters can never throw or alter matching.
+    const normalizedFile = file.replace(/\\/g, '/');
+    if (normalizedFile.includes(`/${routesBasePath}/`)) {
+        const fileName = path.basename(file);
+        if (fileName.startsWith('+page') || fileName.startsWith('+layout') || fileName.startsWith('+error')) {
+            return 'route';
+        }
+    }
+    return 'component';
+}
+
+/**
+ * The setting-independent result of parsing one file: which local names map to which child node
+ * ids, and which of those locals are referenced in the template. The unconditional/unused decision
+ * is intentionally NOT cached here — it depends on the unconditionalDependencyPaths setting, which
+ * can change without the file's mtime changing, so it is applied fresh at graph-assembly time.
+ */
+interface ParseResult {
+    importsByLocal: Record<string, string>;
+    usedLocals: Set<string>;
+}
+
+const parseCache = new Map<string, { mtimeMs: number; size: number; parsed: ParseResult }>();
+
+// Cache keys are normalized to POSIX separators so the glob-produced paths used when
+// populating the cache and the `uri.fsPath` used to invalidate it match on Windows too.
+function cacheKey(p: string): string {
+    return p.replace(/\\/g, '/');
+}
+
+/** Drop a single file's cached parse (called by the extension's file-system watcher). */
+export function invalidateParseCache(absPath: string): void {
+    parseCache.delete(cacheKey(absPath));
+}
+
+function parseSvelteFile(file: string, workspacePath: string): ParseResult {
+    const result: ParseResult = { importsByLocal: {}, usedLocals: new Set() };
+
+    let source: string;
+    try {
+        source = fs.readFileSync(file, 'utf-8');
+    } catch {
+        return result;
+    }
+    if (!source.includes('<script')) {
+        return result; // No script → no imports to track
+    }
+
+    try {
+        const ast = svelte.parse(source);
+
+        // Collect component imports (default + named) keyed by local binding.
+        walk(ast as any, {
+            enter(node: any) {
+                if (
+                    node.type === 'ImportDeclaration' &&
+                    node.source?.value?.endsWith('.svelte')
+                ) {
+                    const childId = resolveImportId(node.source.value, file, workspacePath);
+                    for (const specifier of node.specifiers || []) {
+                        if (specifier.local?.name) {
+                            result.importsByLocal[specifier.local.name] = childId;
+                        }
+                    }
+                }
+            }
+        });
+
+        // Collect which imported locals are referenced in the template (static <Foo/> or
+        // dynamic <svelte:component this={Foo}/>).
+        walk(ast.html as any, {
+            enter(node: any) {
+                if (node.type !== 'InlineComponent') {
+                    return;
+                }
+                let localName: string | undefined;
+                if (node.name === 'svelte:component') {
+                    if (node.expression?.type === 'Identifier') {
+                        localName = node.expression.name;
+                    }
+                } else {
+                    localName = node.name;
+                }
+                if (localName && result.importsByLocal[localName]) {
+                    result.usedLocals.add(localName);
+                }
+            }
+        });
+    } catch (e) {
+        console.error(`Could not parse ${file}: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // The cached result is shared by reference with every caller — treat it as read-only.
+    // Freeze the imports map so an accidental future write is caught instead of silently
+    // poisoning the cache (the Set can't be frozen meaningfully; assembly only reads it).
+    Object.freeze(result.importsByLocal);
+    return result;
+}
+
+/**
+ * Cache-aware parse: re-reads a file only when its mtime OR size has changed since the last
+ * parse. Size is a cheap second signal that catches content changes which preserve mtime
+ * (e.g. a `git checkout` that restores a stale timestamp); the file watcher is the primary
+ * invalidator for edits made inside the editor.
+ */
+function getParsedFile(file: string, workspacePath: string): ParseResult {
+    let mtimeMs: number;
+    let size: number;
+    try {
+        const stat = fs.statSync(file);
+        mtimeMs = stat.mtimeMs;
+        size = stat.size;
+    } catch {
+        return { importsByLocal: {}, usedLocals: new Set() };
+    }
+
+    const key = cacheKey(file);
+    const cached = parseCache.get(key);
+    if (cached && cached.mtimeMs === mtimeMs && cached.size === size) {
+        return cached.parsed;
+    }
+
+    const parsed = parseSvelteFile(file, workspacePath);
+    parseCache.set(key, { mtimeMs, size, parsed });
+    return parsed;
+}
+
 export async function generateComponentGraph(workspacePath: string): Promise<GraphData> {
     const config = vscode.workspace.getConfiguration('svelteVisualizer');
 
     const componentPatterns = config.get<string[]>('componentPaths') || ['**/*.svelte'];
     const routePatterns = config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'];
     const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+    const unconditionalDependencyPaths = config.get<string[]>('unconditionalDependencyPaths') || [];
 
     // Combine all patterns and resolve relative to workspace
     // Use path.posix.join to ensure forward slashes for glob (works on Windows too)
@@ -41,113 +210,48 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
     const dependencyMap: Record<string, Set<string>> = {};
     const allNodes = new Map<string, GraphNode>();
 
+    // Compile the unconditional-dependency globs once, not once per file.
+    const unconditionalMatchers = unconditionalDependencyPaths.map(pattern => new Minimatch(pattern));
+
     for (const file of svelteFiles) {
-        let nodeName: string;
-        let nodeType: 'component' | 'route';
+        const nodeId = toNodeId(file, workspacePath);
+        const nodeType = getNodeType(file, routesBasePath);
 
-        // Check if this file is in a routes directory
-        const normalizedFile = file.replace(/\\/g, '/');
-        const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-        if (routesMatch) {
-            const routePath = path.dirname(routesMatch[2]);
-            const fileName = path.basename(file);
-            let fileType = '';
-
-            if (fileName.startsWith('+page')) fileType = '(page)';
-            else if (fileName.startsWith('+layout')) fileType = '(layout)';
-            else if (fileName.startsWith('+error')) fileType = '(error)';
-
-            if (fileType) {
-                nodeName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-                nodeType = 'route';
-            } else {
-                // It's a component inside the routes folder
-                nodeName = path.basename(file, '.svelte');
-                nodeType = 'component';
-            }
-        } else {
-            nodeName = path.basename(file, '.svelte');
-            nodeType = 'component';
+        if (!allNodes.has(nodeId)) {
+            allNodes.set(nodeId, { id: nodeId, type: nodeType });
         }
+        dependencyMap[nodeId] = new Set();
 
-        if (!allNodes.has(nodeName)) {
-            allNodes.set(nodeName, { id: nodeName, type: nodeType });
-        }
-        dependencyMap[nodeName] = new Set();
+        const { importsByLocal, usedLocals } = getParsedFile(file, workspacePath);
 
-        const source = fs.readFileSync(file, 'utf-8');
-        const isRenderer = file.toLowerCase().includes('renderer');
+        // Files matching a configured glob treat all their .svelte imports as dependencies,
+        // regardless of template usage (e.g. dynamic renderers that resolve children at runtime).
+        const isUnconditional = unconditionalMatchers.some(matcher => matcher.match(nodeId));
 
-        if (!source.includes('<script')) continue; // Skip files without scripts
-
-        try {
-            const ast = svelte.parse(source);
-            const importedComponents: Record<string, string> = {};
-
-            // Find all component imports
-            walk(ast as any, {
-                enter(node: any) {
-                    if (
-                        node.type === 'ImportDeclaration' &&
-                        node.source?.value?.endsWith('.svelte')
-                    ) {
-                        const importedComponentName = path.basename(
-                            node.source.value,
-                            '.svelte'
-                        );
-                        for (const specifier of node.specifiers || []) {
-                            if (specifier.type === 'ImportDefaultSpecifier') {
-                                importedComponents[specifier.local.name] = importedComponentName;
-                            }
-                        }
-                    }
-                }
-            });
-
-            if (isRenderer) {
-                // For renderer components, add all imported components as dependencies
-                for (const childName of Object.values(importedComponents)) {
-                    if (childName !== nodeName) {
-                        // Avoid self-reference
-                        dependencyMap[nodeName].add(childName);
-                        if (!allNodes.has(childName)) {
-                            allNodes.set(childName, { id: childName, type: 'component' });
-                        }
-                    }
-                }
-            } else {
-                // For non-renderer components, find components used in the template
-                const usedComponents = new Set<string>();
-
-                walk(ast.html as any, {
-                    enter(node: any) {
-                        if (
-                            node.type === 'InlineComponent' &&
-                            importedComponents[node.name]
-                        ) {
-                            const childName = importedComponents[node.name];
-                            usedComponents.add(node.name);
-                            dependencyMap[nodeName].add(childName);
-                            if (!allNodes.has(childName)) {
-                                allNodes.set(childName, { id: childName, type: 'component' });
-                            }
-                        }
-                    }
-                });
-
-                // Add unused imported components
-                for (const [localName, childName] of Object.entries(importedComponents)) {
-                    if (!usedComponents.has(localName) && childName !== nodeName) {
-                        dependencyMap[nodeName].add(childName);
-                        if (!allNodes.has(childName)) {
-                            allNodes.set(childName, { id: childName, type: 'component', unused: true });
-                        }
-                    }
-                }
+        const addChild = (childName: string, unused: boolean) => {
+            if (childName === nodeId) {
+                return; // Avoid self-reference
             }
-        } catch (e) {
-            console.error(`Could not parse ${file}: ${e instanceof Error ? e.message : String(e)}`);
+            dependencyMap[nodeId].add(childName);
+            if (!allNodes.has(childName)) {
+                allNodes.set(childName, unused
+                    ? { id: childName, type: 'component', unused: true }
+                    : { id: childName, type: 'component' });
+            }
+        };
+
+        // Classify each import; add the used/unconditional ones first so a child that is used
+        // under one binding is never demoted to "unused" by another binding of the same file.
+        const unusedChildren: string[] = [];
+        for (const [localName, childName] of Object.entries(importsByLocal)) {
+            if (isUnconditional || usedLocals.has(localName)) {
+                addChild(childName, false);
+            } else {
+                unusedChildren.push(childName);
+            }
+        }
+        for (const childName of unusedChildren) {
+            addChild(childName, true);
         }
     }
 

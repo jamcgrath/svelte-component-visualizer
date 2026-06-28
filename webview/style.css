@@ -180,7 +180,10 @@ svg {
 
 .node-text {
   font-size: var(--font-size-sm);
-  pointer-events: none;
+  /* Interactive so the label is part of the node's hit area — hovering it shows the tooltip
+     (the mousemove handler lives on the node group and receives the bubbled event). */
+  pointer-events: auto;
+  user-select: none; /* don't select the label text when dragging a node */
 }
 
 /* Node state classes - colors defined in themes */
@@ -301,29 +304,6 @@ svg {
 
 .legend-item--inactive span {
   text-decoration: line-through;
-}
-
-.toggle-controls {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-}
-
-.toggle-controls label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-}
-
-.toggle-controls input[type="checkbox"] {
-  margin-right: var(--spacing-sm);
-  cursor: pointer;
-  width: var(--control-height-md);
-  height: var(--control-height-md);
-}
-
-.toggle-controls span {
-  user-select: none;
 }
 
 /* Screen reader only content */
@@ -461,6 +441,24 @@ svg {
   min-width: 180px;
   z-index: var(--z-modal);
   font-size: var(--font-size-sm);
+}
+
+.graph-tooltip {
+  position: fixed;
+  display: none;
+  pointer-events: none;
+  z-index: var(--z-modal);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .context-menu-item {
