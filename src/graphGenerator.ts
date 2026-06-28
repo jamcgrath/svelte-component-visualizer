@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
+import { minimatch } from 'minimatch';
 import * as svelte from 'svelte/compiler';
 import { walk } from 'estree-walker';
 import * as vscode from 'vscode';
@@ -67,6 +68,7 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
     const componentPatterns = config.get<string[]>('componentPaths') || ['**/*.svelte'];
     const routePatterns = config.get<string[]>('routePaths') || ['**/routes/**/*.svelte'];
     const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+    const unconditionalDependencyPaths = config.get<string[]>('unconditionalDependencyPaths') || [];
 
     // Combine all patterns and resolve relative to workspace
     // Use path.posix.join to ensure forward slashes for glob (works on Windows too)
@@ -91,7 +93,9 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
         dependencyMap[nodeId] = new Set();
 
         const source = fs.readFileSync(file, 'utf-8');
-        const isRenderer = file.toLowerCase().includes('renderer');
+        // Files matching a configured glob treat all their .svelte imports as dependencies,
+        // regardless of template usage (e.g. dynamic renderers that resolve children at runtime).
+        const isUnconditional = unconditionalDependencyPaths.some(pattern => minimatch(nodeId, pattern));
 
         if (!source.includes('<script')) continue; // Skip files without scripts
 
@@ -118,8 +122,8 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                 }
             });
 
-            if (isRenderer) {
-                // For renderer components, add all imported components as dependencies
+            if (isUnconditional) {
+                // Unconditional-dependency file: add every imported component as a dependency
                 for (const childName of Object.values(importedComponents)) {
                     if (childName !== nodeId) {
                         // Avoid self-reference

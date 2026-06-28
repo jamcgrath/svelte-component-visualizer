@@ -103,6 +103,14 @@
           "default": "routes",
           "description": "Base path for routes (used for route naming). Will search for this directory name anywhere in the project."
         },
+        "svelteVisualizer.unconditionalDependencyPaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Glob patterns (matched against each file's workspace-relative path). Files matching a pattern treat ALL of their .svelte imports as dependencies, regardless of whether the component appears in the template — useful for dynamic renderer components that resolve children at runtime."
+        },
         "svelteVisualizer.theme": {
           "type": "string",
           "enum": [
