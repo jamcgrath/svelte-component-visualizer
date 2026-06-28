@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { generateComponentGraph, invalidateParseCache } from './graphGenerator';
+import { generateComponentGraph, invalidateParseCache, toNodeId, getNodeType } from './graphGenerator';
 
 let currentPanel: vscode.WebviewPanel | undefined;
 
@@ -176,33 +176,15 @@ async function showVisualizerPanel(context: vscode.ExtensionContext) {
 }
 
 /**
- * Canonical node id for a file: workspace-relative, POSIX-separated path (keeps `.svelte`).
- * Must match `toNodeId` in graphGenerator.ts so file->id and id->file round-trip exactly.
+ * Canonical node id for a file: workspace-relative, POSIX-separated path. Delegates to
+ * graphGenerator's `toNodeId` so file->id and id->file round-trip exactly (single source of truth).
  */
 function fileToNodeId(fsPath: string): string | null {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
         return null;
     }
-    return path.relative(workspaceFolder.uri.fsPath, fsPath).split(path.sep).join('/');
-}
-
-/**
- * Mirror of `getNodeType` in graphGenerator.ts: a +page/+layout/+error file under the routes
- * base path is a route; everything else is a component. Used to tell the webview which search
- * box (component vs route) to populate when focusing.
- */
-function getNodeTypeFromPath(fsPath: string, routesBasePath: string): 'component' | 'route' {
-    // Plain substring test (not a RegExp) so a routesBasePath with regex
-    // metacharacters can never throw or alter matching. Mirrors graphGenerator's getNodeType.
-    const normalized = fsPath.replace(/\\/g, '/');
-    if (normalized.includes(`/${routesBasePath}/`)) {
-        const fileName = path.basename(fsPath);
-        if (fileName.startsWith('+page') || fileName.startsWith('+layout') || fileName.startsWith('+error')) {
-            return 'route';
-        }
-    }
-    return 'component';
+    return toNodeId(fsPath, workspaceFolder.uri.fsPath);
 }
 
 async function showComponentInVisualizer(context: vscode.ExtensionContext, uri: vscode.Uri) {
@@ -222,7 +204,7 @@ async function showComponentInVisualizer(context: vscode.ExtensionContext, uri: 
     if (!componentName) {
         return;
     }
-    const nodeType = getNodeTypeFromPath(filePath, routesBasePath);
+    const nodeType = getNodeType(filePath, routesBasePath);
 
     // Open or reveal the visualizer panel
     await showVisualizerPanel(context);
@@ -261,7 +243,7 @@ async function focusDroppedFile(filePath: string, panel: vscode.WebviewPanel) {
     if (!componentName) {
         return;
     }
-    const nodeType = getNodeTypeFromPath(filePath, routesBasePath);
+    const nodeType = getNodeType(filePath, routesBasePath);
 
     // Send focus message to webview
     panel.webview.postMessage({

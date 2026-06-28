@@ -14,8 +14,10 @@ let routesBasePath = 'routes'; // Sent from the extension; used to derive route 
 
 // --- Display labels ---
 // Node ids are workspace-relative paths (e.g. "src/lib/Button.svelte"). Components show their
-// basename; routes show the human-readable "(page) /path" form derived from the path. Selection
-// and filtering always use the id, never the label.
+// basename; routes show the human-readable "(page) /path" form derived from the path. When two
+// nodes would render the same label, a minimal distinguishing directory suffix is appended.
+// Labels are computed once per graph load into `labelById`; selection and filtering always use
+// the id, never the label.
 function basename(id) {
   const seg = id.split('/').pop() || id;
   return seg.endsWith('.svelte') ? seg.slice(0, -'.svelte'.length) : seg;
@@ -26,7 +28,6 @@ function posixDirname(s) {
   return i === -1 ? '.' : s.slice(0, i);
 }
 
-// Mirrors graphGenerator's original route-naming scheme so labels are unchanged from before.
 function deriveRouteLabel(id, base) {
   // Locate the routes base segment with plain string ops (not a RegExp) so a base
   // containing regex metacharacters can never throw or mis-match. Matches the base at
@@ -47,46 +48,76 @@ function deriveRouteLabel(id, base) {
   if (fileName.startsWith('+page')) fileType = '(page)';
   else if (fileName.startsWith('+layout')) fileType = '(layout)';
   else if (fileName.startsWith('+error')) fileType = '(error)';
-  const routePath = posixDirname(afterBase);
-  return `${fileType} ${routePath || '/'}`;
+  const dir = posixDirname(afterBase);
+  // Root route (posixDirname returns '.') renders as '/'.
+  return `${fileType} ${dir && dir !== '.' ? dir : '/'}`;
 }
 
-// Component basenames that appear on more than one node (e.g. two Button.svelte in different
-// folders). Recomputed whenever graph data arrives; used to disambiguate otherwise-identical labels.
-let collidingBasenames = new Set();
-
-function computeCollidingBasenames(nodes) {
-  const counts = new Map();
-  nodes.forEach((n) => {
-    if (n.type !== 'component') return; // routes are disambiguated by their path-derived label
-    const b = basename(n.id);
-    counts.set(b, (counts.get(b) || 0) + 1);
-  });
-  collidingBasenames = new Set(
-    [...counts.entries()].filter(([, count]) => count > 1).map(([b]) => b)
-  );
+// The base (pre-disambiguation) label for a node: basename for components, derived path for routes.
+function baseLabel(node) {
+  return node.type === 'route' ? deriveRouteLabel(node.id, routesBasePath) : basename(node.id);
 }
 
-function parentDirName(id) {
+// Directory segments of an id, excluding the filename.
+function dirSegments(id) {
   const parts = id.split('/');
-  return parts.length >= 2 ? parts[parts.length - 2] : '';
+  parts.pop();
+  return parts;
+}
+
+// Final display label per node id, computed once when graph data arrives. Nodes whose base label
+// is unique keep it; colliding nodes (including two routes that derive the same label) get the
+// shortest trailing directory suffix that distinguishes them within their collision group, e.g.
+// "Button (lib/ui)" vs "Button (admin/ui)".
+let labelById = new Map();
+
+function computeLabels(nodes) {
+  labelById = new Map();
+  const groups = new Map();
+  for (const n of nodes) {
+    const b = baseLabel(n);
+    const group = groups.get(b);
+    if (group) group.push(n); else groups.set(b, [n]);
+  }
+  for (const [base, group] of groups) {
+    if (group.length === 1) {
+      labelById.set(group[0].id, base);
+      continue;
+    }
+    const segsById = new Map(group.map((n) => [n.id, dirSegments(n.id)]));
+    const maxLen = Math.max(...group.map((n) => segsById.get(n.id).length));
+    const assigned = new Set();
+    for (let take = 1; take <= maxLen && assigned.size < group.length; take++) {
+      const counts = new Map();
+      for (const n of group) {
+        if (assigned.has(n.id)) continue;
+        const segs = segsById.get(n.id);
+        const suffix = segs.slice(segs.length - take).join('/');
+        counts.set(suffix, (counts.get(suffix) || 0) + 1);
+      }
+      for (const n of group) {
+        if (assigned.has(n.id)) continue;
+        const segs = segsById.get(n.id);
+        const suffix = segs.slice(segs.length - take).join('/');
+        if (counts.get(suffix) === 1) {
+          labelById.set(n.id, suffix ? `${base} (${suffix})` : base);
+          assigned.add(n.id);
+        }
+      }
+    }
+    // Genuinely indistinguishable ids (same directory): fall back to the base label.
+    for (const n of group) {
+      if (!assigned.has(n.id)) labelById.set(n.id, base);
+    }
+  }
 }
 
 function displayLabel(node) {
-  if (node.type === 'route') {
-    return deriveRouteLabel(node.id, routesBasePath);
-  }
-  const base = basename(node.id);
-  if (collidingBasenames.has(base)) {
-    const dir = parentDirName(node.id);
-    return dir ? `${base} (${dir})` : base;
-  }
-  return base;
+  return labelById.get(node.id) || baseLabel(node);
 }
 
 function labelForId(id) {
-  const node = fullGraphData && fullGraphData.nodes.find((n) => n.id === id);
-  return node ? displayLabel(node) : basename(id);
+  return labelById.get(id) || basename(id);
 }
 
 // Per-category visibility toggles (legend filters)
@@ -155,7 +186,7 @@ window.addEventListener('message', event => {
 
 function initializeGraph(graph) {
   fullGraphData = graph;
-  computeCollidingBasenames(graph.nodes);
+  computeLabels(graph.nodes);
   const allSortedNodes = [...graph.nodes].sort((a, b) => a.id.localeCompare(b.id));
   sortedComponents = allSortedNodes.filter(n => n.type === 'component');
   sortedRoutes = allSortedNodes.filter(n => n.type === 'route');

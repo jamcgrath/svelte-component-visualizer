@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
-import { minimatch } from 'minimatch';
+import { Minimatch } from 'minimatch';
 import * as svelte from 'svelte/compiler';
 import { walk } from 'estree-walker';
 import * as vscode from 'vscode';
@@ -27,7 +27,7 @@ interface GraphData {
  * This is the single source of truth so a scanned file and an import that points at it always
  * produce the identical id string — otherwise links orphan into phantom duplicate nodes.
  */
-function toNodeId(absPath: string, workspaceRoot: string): string {
+export function toNodeId(absPath: string, workspaceRoot: string): string {
     return path.relative(workspaceRoot, absPath).split(path.sep).join('/');
 }
 
@@ -49,8 +49,9 @@ function resolveImportId(specifier: string, importingFileAbs: string, workspaceR
 /**
  * A node is a `route` only when it is a +page/+layout/+error file under the routes base path;
  * every other `.svelte` file (including components living inside the routes folder) is a component.
+ * Exported so the extension host reuses this exact logic instead of re-implementing it.
  */
-function getNodeType(file: string, routesBasePath: string): 'component' | 'route' {
+export function getNodeType(file: string, routesBasePath: string): 'component' | 'route' {
     // Plain substring test (not a RegExp) so a routesBasePath containing regex
     // metacharacters can never throw or alter matching.
     const normalizedFile = file.replace(/\\/g, '/');
@@ -74,7 +75,7 @@ interface ParseResult {
     usedLocals: Set<string>;
 }
 
-const parseCache = new Map<string, { mtimeMs: number; parsed: ParseResult }>();
+const parseCache = new Map<string, { mtimeMs: number; size: number; parsed: ParseResult }>();
 
 // Cache keys are normalized to POSIX separators so the glob-produced paths used when
 // populating the cache and the `uri.fsPath` used to invalidate it match on Windows too.
@@ -144,26 +145,38 @@ function parseSvelteFile(file: string, workspacePath: string): ParseResult {
         console.error(`Could not parse ${file}: ${e instanceof Error ? e.message : String(e)}`);
     }
 
+    // The cached result is shared by reference with every caller — treat it as read-only.
+    // Freeze the imports map so an accidental future write is caught instead of silently
+    // poisoning the cache (the Set can't be frozen meaningfully; assembly only reads it).
+    Object.freeze(result.importsByLocal);
     return result;
 }
 
-/** Cache-aware parse: re-reads a file only when its mtime has changed since the last parse. */
+/**
+ * Cache-aware parse: re-reads a file only when its mtime OR size has changed since the last
+ * parse. Size is a cheap second signal that catches content changes which preserve mtime
+ * (e.g. a `git checkout` that restores a stale timestamp); the file watcher is the primary
+ * invalidator for edits made inside the editor.
+ */
 function getParsedFile(file: string, workspacePath: string): ParseResult {
     let mtimeMs: number;
+    let size: number;
     try {
-        mtimeMs = fs.statSync(file).mtimeMs;
+        const stat = fs.statSync(file);
+        mtimeMs = stat.mtimeMs;
+        size = stat.size;
     } catch {
         return { importsByLocal: {}, usedLocals: new Set() };
     }
 
     const key = cacheKey(file);
     const cached = parseCache.get(key);
-    if (cached && cached.mtimeMs === mtimeMs) {
+    if (cached && cached.mtimeMs === mtimeMs && cached.size === size) {
         return cached.parsed;
     }
 
     const parsed = parseSvelteFile(file, workspacePath);
-    parseCache.set(key, { mtimeMs, parsed });
+    parseCache.set(key, { mtimeMs, size, parsed });
     return parsed;
 }
 
@@ -188,6 +201,9 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
     const dependencyMap: Record<string, Set<string>> = {};
     const allNodes = new Map<string, GraphNode>();
 
+    // Compile the unconditional-dependency globs once, not once per file.
+    const unconditionalMatchers = unconditionalDependencyPaths.map(pattern => new Minimatch(pattern));
+
     for (const file of svelteFiles) {
         const nodeId = toNodeId(file, workspacePath);
         const nodeType = getNodeType(file, routesBasePath);
@@ -201,7 +217,7 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
 
         // Files matching a configured glob treat all their .svelte imports as dependencies,
         // regardless of template usage (e.g. dynamic renderers that resolve children at runtime).
-        const isUnconditional = unconditionalDependencyPaths.some(pattern => minimatch(nodeId, pattern));
+        const isUnconditional = unconditionalMatchers.some(matcher => matcher.match(nodeId));
 
         const addChild = (childName: string, unused: boolean) => {
             if (childName === nodeId) {
