@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { generateComponentGraph } from './graphGenerator';
+import { generateComponentGraph, invalidateParseCache } from './graphGenerator';
 
 let currentPanel: vscode.WebviewPanel | undefined;
 
@@ -51,11 +51,20 @@ export function activate(context: vscode.ExtensionContext) {
         }
     );
 
+    // Invalidate cached parses when .svelte files change on disk, so the next refresh
+    // re-parses only what actually changed. (The generator's mtime check is the correctness
+    // guarantee; this watcher keeps the cache tidy and drops entries for deleted files.)
+    const svelteWatcher = vscode.workspace.createFileSystemWatcher('**/*.svelte');
+    svelteWatcher.onDidChange(uri => invalidateParseCache(uri.fsPath));
+    svelteWatcher.onDidCreate(uri => invalidateParseCache(uri.fsPath));
+    svelteWatcher.onDidDelete(uri => invalidateParseCache(uri.fsPath));
+
     context.subscriptions.push(
         showGraphCommand,
         refreshGraphCommand,
         showComponentInGraphCommand,
-        insertFilePathInTerminalCommand
+        insertFilePathInTerminalCommand,
+        svelteWatcher
     );
 }
 
