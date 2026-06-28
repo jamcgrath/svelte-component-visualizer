@@ -67,9 +67,10 @@ function dirSegments(id) {
 }
 
 // Final display label per node id, computed once when graph data arrives. Nodes whose base label
-// is unique keep it; colliding nodes (including two routes that derive the same label) get the
-// shortest trailing directory suffix that distinguishes them within their collision group, e.g.
-// "Button (lib/ui)" vs "Button (admin/ui)".
+// is unique keep it; colliding nodes (including two routes that derive the same label) are
+// qualified with only the part of their path that actually DIFFERS from the others in the group —
+// the directory shared by all (common prefix and suffix) is stripped, so a monorepo collision that
+// differs only in the app folder reads "Banner (pages-mamamia-com-au)", not the whole path.
 let labelById = new Map();
 
 function computeLabels(nodes) {
@@ -85,31 +86,28 @@ function computeLabels(nodes) {
       labelById.set(group[0].id, base);
       continue;
     }
-    const segsById = new Map(group.map((n) => [n.id, dirSegments(n.id)]));
-    const maxLen = Math.max(...group.map((n) => segsById.get(n.id).length));
-    const assigned = new Set();
-    for (let take = 1; take <= maxLen && assigned.size < group.length; take++) {
-      const counts = new Map();
-      for (const n of group) {
-        if (assigned.has(n.id)) continue;
-        const segs = segsById.get(n.id);
-        const suffix = segs.slice(segs.length - take).join('/');
-        counts.set(suffix, (counts.get(suffix) || 0) + 1);
-      }
-      for (const n of group) {
-        if (assigned.has(n.id)) continue;
-        const segs = segsById.get(n.id);
-        const suffix = segs.slice(segs.length - take).join('/');
-        if (counts.get(suffix) === 1) {
-          labelById.set(n.id, suffix ? `${base} (${suffix})` : base);
-          assigned.add(n.id);
-        }
-      }
+    const segsList = group.map((n) => dirSegments(n.id));
+    const minLen = Math.min(...segsList.map((s) => s.length));
+
+    // Longest run of leading directory segments shared by every node in the group.
+    let prefixLen = 0;
+    while (prefixLen < minLen && segsList.every((s) => s[prefixLen] === segsList[0][prefixLen])) {
+      prefixLen++;
     }
-    // Genuinely indistinguishable ids (same directory): fall back to the base label.
-    for (const n of group) {
-      if (!assigned.has(n.id)) labelById.set(n.id, base);
+    // Longest run of trailing segments shared by all, without overlapping the common prefix.
+    let suffixLen = 0;
+    while (
+      suffixLen < minLen - prefixLen &&
+      segsList.every((s) => s[s.length - 1 - suffixLen] === segsList[0][segsList[0].length - 1 - suffixLen])
+    ) {
+      suffixLen++;
     }
+    // Each node's qualifier is the differing middle. It is unique within the group (two equal
+    // middles would mean identical paths), and empty for at most one node (rendered bare).
+    group.forEach((n, i) => {
+      const middle = segsList[i].slice(prefixLen, segsList[i].length - suffixLen).join('/');
+      labelById.set(n.id, middle ? `${base} (${middle})` : base);
+    });
   }
 }
 
