@@ -107,8 +107,10 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                         node.source?.value?.endsWith('.svelte')
                     ) {
                         const childId = resolveImportId(node.source.value, file, workspacePath);
+                        // Track every specifier's local binding (default + named), not just the
+                        // default import — named imports from .svelte files are real dependencies too.
                         for (const specifier of node.specifiers || []) {
-                            if (specifier.type === 'ImportDefaultSpecifier') {
+                            if (specifier.local?.name) {
                                 importedComponents[specifier.local.name] = childId;
                             }
                         }
