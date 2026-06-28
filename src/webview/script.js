@@ -11,6 +11,7 @@ let sortedComponents, sortedRoutes;
 let showUnusedImports = true;
 let currentSelectedId = null; // Track current selection for re-rendering
 let routesBasePath = 'routes'; // Sent from the extension; used to derive route labels from path ids
+let showPathOnHover = true; // Setting: short label on the node + full label on hover, vs full label inline
 
 // --- Display labels ---
 // Node ids are workspace-relative paths (e.g. "src/lib/Button.svelte"). Components show their
@@ -182,9 +183,20 @@ window.addEventListener('message', event => {
     if (message.routesBasePath) {
       routesBasePath = message.routesBasePath;
     }
+    if (message.showPathOnHover !== undefined) {
+      showPathOnHover = message.showPathOnHover;
+    }
     initializeGraph(message.data);
   } else if (message.command === 'focusComponent') {
     focusOnComponent(message.componentName, message.nodeType);
+  } else if (message.command === 'setOptions') {
+    // Display-only toggle from settings — re-render the current view without a re-scan.
+    if (message.showPathOnHover !== undefined) {
+      showPathOnHover = message.showPathOnHover;
+    }
+    if (fullGraphData) {
+      updateGraph(currentSelectedId);
+    }
   }
 });
 
@@ -444,10 +456,10 @@ function updateGraph(selectedId) {
       showNodeContextMenu(event, d);
     })
     .on("mousemove", (event, d) => {
-      // Reveal the full disambiguated label on hover (only when it differs from the short
-      // label already on the canvas). Follows the cursor; shows instantly, no native delay.
+      // Reveal the full disambiguated label on hover (only when showPathOnHover is enabled and
+      // the full label differs from the short label on the canvas). Follows the cursor; instant.
       const full = displayLabel(d);
-      if (full === baseLabel(d)) {
+      if (!showPathOnHover || full === baseLabel(d)) {
         graphTooltip.style("display", "none");
         return;
       }
@@ -475,7 +487,7 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => baseLabel(d))
+    .text((d) => (showPathOnHover ? baseLabel(d) : displayLabel(d)))
     .attr("class", "node-text")
     .attr("x", 12)
     .attr("y", 3);

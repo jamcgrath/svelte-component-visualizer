@@ -13,6 +13,14 @@ export function activate(context: vscode.ExtensionContext) {
             e.affectsConfiguration('svelteVisualizer.colorScheme')) {
             updateWebviewTheme();
         }
+        if (e.affectsConfiguration('svelteVisualizer.showPathOnHover') && currentPanel) {
+            // Display-only toggle: re-render from the data the webview already has, no re-scan.
+            const config = vscode.workspace.getConfiguration('svelteVisualizer');
+            currentPanel.webview.postMessage({
+                command: 'setOptions',
+                showPathOnHover: config.get<boolean>('showPathOnHover') ?? true
+            });
+        }
     });
 
     // Register command to show the visualizer
@@ -288,12 +296,14 @@ async function refreshGraph(_context: vscode.ExtensionContext, panel: vscode.Web
         const graphData = await generateComponentGraph(workspaceFolder.uri.fsPath);
         const config = vscode.workspace.getConfiguration('svelteVisualizer');
         const routesBasePath = config.get<string>('routesBasePath') || 'routes';
+        const showPathOnHover = config.get<boolean>('showPathOnHover') ?? true;
 
         // Send graph data to webview (routesBasePath lets the webview derive route labels from path ids)
         panel.webview.postMessage({
             command: 'updateGraph',
             data: graphData,
-            routesBasePath: routesBasePath
+            routesBasePath: routesBasePath,
+            showPathOnHover: showPathOnHover
         });
     } catch (error) {
         vscode.window.showErrorMessage(

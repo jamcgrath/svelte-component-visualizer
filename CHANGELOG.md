@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Named `.svelte` imports are now tracked as dependencies (previously only default imports were)
 - `<svelte:component this={Component}>` dynamic usage is tracked when `this` is a direct component identifier
 - `svelteVisualizer.unconditionalDependencyPaths` setting (array of glob patterns): files matching a pattern treat all of their `.svelte` imports as dependencies regardless of template usage — useful for dynamic renderer components
+- `svelteVisualizer.showPathOnHover` setting (boolean, default `true`): show short names on the graph and reveal the full disambiguated label on hover, or disable to show the full label inline
 - Incremental parsing: per-file parse results are cached by mtime and size, and a `.svelte` file watcher invalidates them, so refreshes only re-parse files that actually changed
 
 ### Changed
