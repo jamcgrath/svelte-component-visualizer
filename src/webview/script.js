@@ -440,6 +440,10 @@ function updateGraph(selectedId) {
       showNodeContextMenu(event, d);
     });
 
+  // Native tooltip: reveal the full disambiguated label (with its path suffix) on hover,
+  // so the canvas can stay uncluttered with just the short name.
+  node.append("title").text((d) => displayLabel(d));
+
   // Append a circle for components and a rect for routes
   node.each(function(d) {
       const group = d3.select(this);
@@ -456,7 +460,7 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => displayLabel(d))
+    .text((d) => baseLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
     .attr("y", 3);

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Graph node ids are now workspace-relative file paths instead of basenames, so two same-named components (e.g. two `Button.svelte` in different folders) no longer collapse into a single node with misrouted edges
-- Colliding display labels are disambiguated with the shortest distinguishing directory suffix (e.g. `Button (lib)` / `Button (widgets)`, going deeper only when needed), for both components and routes; unique names are unchanged
+- Colliding display labels are disambiguated with the shortest distinguishing directory suffix (e.g. `Button (lib)` / `Button (widgets)`, going deeper only when needed), for both components and routes; unique names are unchanged. On the graph, nodes show just the short name and reveal the full label on hover; the search list shows the full label
 - Bumped Svelte to 5.56.4
 
 ### Removed
