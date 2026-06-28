@@ -8,7 +8,6 @@ const height = graphContainer.clientHeight;
 let fullGraphData;
 let simulation;
 let sortedComponents, sortedRoutes;
-let showUnusedImports = true;
 let currentSelectedId = null; // Track current selection for re-rendering
 let routesBasePath = 'routes'; // Sent from the extension; used to derive route labels from path ids
 let showPathOnHover = true; // Setting: short label on the node + full label on hover, vs full label inline
@@ -267,19 +266,6 @@ function updateGraph(selectedId) {
     // Full graph
     nodes = graphCopy.nodes;
     links = graphCopy.links;
-  }
-
-  // Filter unused components if toggle is off
-  if (!showUnusedImports) {
-    const unusedNodeIds = new Set(
-      nodes.filter(n => n.unused).map(n => n.id)
-    );
-    nodes = nodes.filter(n => !n.unused);
-    links = links.filter(l => {
-      const targetId = l.target.id || l.target;
-      const sourceId = l.source.id || l.source;
-      return !unusedNodeIds.has(targetId) && !unusedNodeIds.has(sourceId);
-    });
   }
 
   // Classify nodes into categories for legend filtering
@@ -646,14 +632,6 @@ refreshBtn.on("click", () => {
   vscode.postMessage({
     command: 'refresh'
   });
-});
-
-// Toggle for showing/hiding unused imports
-const showUnusedToggle = d3.select("#show-unused-toggle");
-showUnusedToggle.on("change", function() {
-  showUnusedImports = this.checked;
-  // Re-render graph with current selection
-  updateGraph(currentSelectedId);
 });
 
 // Legend filter toggles

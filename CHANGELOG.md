@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - The implicit "renderer" filename heuristic (any file with "renderer" in its path). Files that need all imports treated as dependencies must now be listed explicitly via `svelteVisualizer.unconditionalDependencyPaths`
+- The standalone "Show Unused Imports" checkbox — it duplicated the legend's "Unused Import" filter; click that legend item to toggle unused-import visibility instead
 
 ## [0.3.0] - 2026-04-03
 

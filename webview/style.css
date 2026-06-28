@@ -306,29 +306,6 @@ svg {
   text-decoration: line-through;
 }
 
-.toggle-controls {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md);
-}
-
-.toggle-controls label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-}
-
-.toggle-controls input[type="checkbox"] {
-  margin-right: var(--spacing-sm);
-  cursor: pointer;
-  width: var(--control-height-md);
-  height: var(--control-height-md);
-}
-
-.toggle-controls span {
-  user-select: none;
-}
-
 /* Screen reader only content */
 .sr-only {
   position: absolute;
