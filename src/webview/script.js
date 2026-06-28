@@ -440,22 +440,17 @@ function updateGraph(selectedId) {
       showNodeContextMenu(event, d);
     });
 
-  // Native tooltip: reveal the full disambiguated label (with its path suffix) on hover,
-  // so the canvas can stay uncluttered with just the short name.
-  node.append("title").text((d) => displayLabel(d));
-
-  // Append a circle for components and a rect for routes
+  // Append a circle for components and a rect for routes. The shape carries a native <title>
+  // tooltip so hovering a node reveals its full disambiguated label (with the path suffix),
+  // keeping the canvas uncluttered with just the short name. The title lives on the shape (not
+  // the group) because the node-text label has `pointer-events: none`, so the shape is what
+  // actually receives the hover.
   node.each(function(d) {
       const group = d3.select(this);
-      if (d.type === 'route') {
-          group.append('rect')
-              .attr('width', 16)
-              .attr('height', 16)
-              .attr('x', -8)
-              .attr('y', -8);
-      } else {
-          group.append('circle').attr('r', 8);
-      }
+      const shape = d.type === 'route'
+          ? group.append('rect').attr('width', 16).attr('height', 16).attr('x', -8).attr('y', -8)
+          : group.append('circle').attr('r', 8);
+      shape.append('title').text(displayLabel(d));
   });
 
   node
