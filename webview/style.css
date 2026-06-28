@@ -180,7 +180,10 @@ svg {
 
 .node-text {
   font-size: var(--font-size-sm);
-  pointer-events: none;
+  /* Interactive so the label is part of the node's hit area — hovering it shows the tooltip
+     (the mousemove handler lives on the node group and receives the bubbled event). */
+  pointer-events: auto;
+  user-select: none; /* don't select the label text when dragging a node */
 }
 
 /* Node state classes - colors defined in themes */
