@@ -135,12 +135,24 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
 
                 walk(ast.html as any, {
                     enter(node: any) {
-                        if (
-                            node.type === 'InlineComponent' &&
-                            importedComponents[node.name]
-                        ) {
-                            const childName = importedComponents[node.name];
-                            usedComponents.add(node.name);
+                        if (node.type !== 'InlineComponent') {
+                            return;
+                        }
+                        // Static usage <Foo/> binds via node.name; dynamic usage
+                        // <svelte:component this={Foo}/> binds via the `this` expression when
+                        // it is a bare identifier matching an imported component.
+                        let localName: string | undefined;
+                        if (node.name === 'svelte:component') {
+                            if (node.expression?.type === 'Identifier') {
+                                localName = node.expression.name;
+                            }
+                        } else {
+                            localName = node.name;
+                        }
+
+                        if (localName && importedComponents[localName]) {
+                            const childName = importedComponents[localName];
+                            usedComponents.add(localName);
                             dependencyMap[nodeId].add(childName);
                             if (!allNodes.has(childName)) {
                                 allNodes.set(childName, { id: childName, type: 'component' });
