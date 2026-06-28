@@ -21,6 +21,46 @@ interface GraphData {
     links: GraphLink[];
 }
 
+/**
+ * Canonical node id: workspace-relative, POSIX-separated path (keeps the `.svelte` extension).
+ * This is the single source of truth so a scanned file and an import that points at it always
+ * produce the identical id string — otherwise links orphan into phantom duplicate nodes.
+ */
+function toNodeId(absPath: string, workspaceRoot: string): string {
+    return path.relative(workspaceRoot, absPath).split(path.sep).join('/');
+}
+
+/**
+ * Resolve an import specifier (as written in source) to the same canonical id its target file
+ * would get when scanned. Handles relative specifiers and SvelteKit's `$lib` alias; anything
+ * else falls back to a best-effort id (a leaf node with no outgoing edges).
+ */
+function resolveImportId(specifier: string, importingFileAbs: string, workspaceRoot: string): string {
+    if (specifier.startsWith('./') || specifier.startsWith('../')) {
+        return toNodeId(path.resolve(path.dirname(importingFileAbs), specifier), workspaceRoot);
+    }
+    if (specifier.startsWith('$lib/')) {
+        return toNodeId(path.join(workspaceRoot, 'src', 'lib', specifier.slice('$lib/'.length)), workspaceRoot);
+    }
+    return specifier.replace(/^\.\//, '');
+}
+
+/**
+ * A node is a `route` only when it is a +page/+layout/+error file under the routes base path;
+ * every other `.svelte` file (including components living inside the routes folder) is a component.
+ */
+function getNodeType(file: string, routesBasePath: string): 'component' | 'route' {
+    const normalizedFile = file.replace(/\\/g, '/');
+    const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
+    if (routesMatch) {
+        const fileName = path.basename(file);
+        if (fileName.startsWith('+page') || fileName.startsWith('+layout') || fileName.startsWith('+error')) {
+            return 'route';
+        }
+    }
+    return 'component';
+}
+
 export async function generateComponentGraph(workspacePath: string): Promise<GraphData> {
     const config = vscode.workspace.getConfiguration('svelteVisualizer');
 
@@ -42,39 +82,13 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
     const allNodes = new Map<string, GraphNode>();
 
     for (const file of svelteFiles) {
-        let nodeName: string;
-        let nodeType: 'component' | 'route';
+        const nodeId = toNodeId(file, workspacePath);
+        const nodeType = getNodeType(file, routesBasePath);
 
-        // Check if this file is in a routes directory
-        const normalizedFile = file.replace(/\\/g, '/');
-        const routesMatch = normalizedFile.match(new RegExp(`/(${routesBasePath})/(.*)$`));
-
-        if (routesMatch) {
-            const routePath = path.dirname(routesMatch[2]);
-            const fileName = path.basename(file);
-            let fileType = '';
-
-            if (fileName.startsWith('+page')) fileType = '(page)';
-            else if (fileName.startsWith('+layout')) fileType = '(layout)';
-            else if (fileName.startsWith('+error')) fileType = '(error)';
-
-            if (fileType) {
-                nodeName = `${fileType} ${routePath.replace(/\\/g, '/') || '/'}`;
-                nodeType = 'route';
-            } else {
-                // It's a component inside the routes folder
-                nodeName = path.basename(file, '.svelte');
-                nodeType = 'component';
-            }
-        } else {
-            nodeName = path.basename(file, '.svelte');
-            nodeType = 'component';
+        if (!allNodes.has(nodeId)) {
+            allNodes.set(nodeId, { id: nodeId, type: nodeType });
         }
-
-        if (!allNodes.has(nodeName)) {
-            allNodes.set(nodeName, { id: nodeName, type: nodeType });
-        }
-        dependencyMap[nodeName] = new Set();
+        dependencyMap[nodeId] = new Set();
 
         const source = fs.readFileSync(file, 'utf-8');
         const isRenderer = file.toLowerCase().includes('renderer');
@@ -92,13 +106,10 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                         node.type === 'ImportDeclaration' &&
                         node.source?.value?.endsWith('.svelte')
                     ) {
-                        const importedComponentName = path.basename(
-                            node.source.value,
-                            '.svelte'
-                        );
+                        const childId = resolveImportId(node.source.value, file, workspacePath);
                         for (const specifier of node.specifiers || []) {
                             if (specifier.type === 'ImportDefaultSpecifier') {
-                                importedComponents[specifier.local.name] = importedComponentName;
+                                importedComponents[specifier.local.name] = childId;
                             }
                         }
                     }
@@ -108,9 +119,9 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
             if (isRenderer) {
                 // For renderer components, add all imported components as dependencies
                 for (const childName of Object.values(importedComponents)) {
-                    if (childName !== nodeName) {
+                    if (childName !== nodeId) {
                         // Avoid self-reference
-                        dependencyMap[nodeName].add(childName);
+                        dependencyMap[nodeId].add(childName);
                         if (!allNodes.has(childName)) {
                             allNodes.set(childName, { id: childName, type: 'component' });
                         }
@@ -128,7 +139,7 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
                         ) {
                             const childName = importedComponents[node.name];
                             usedComponents.add(node.name);
-                            dependencyMap[nodeName].add(childName);
+                            dependencyMap[nodeId].add(childName);
                             if (!allNodes.has(childName)) {
                                 allNodes.set(childName, { id: childName, type: 'component' });
                             }
@@ -138,8 +149,8 @@ export async function generateComponentGraph(workspacePath: string): Promise<Gra
 
                 // Add unused imported components
                 for (const [localName, childName] of Object.entries(importedComponents)) {
-                    if (!usedComponents.has(localName) && childName !== nodeName) {
-                        dependencyMap[nodeName].add(childName);
+                    if (!usedComponents.has(localName) && childName !== nodeId) {
+                        dependencyMap[nodeId].add(childName);
                         if (!allNodes.has(childName)) {
                             allNodes.set(childName, { id: childName, type: 'component', unused: true });
                         }

@@ -10,6 +10,44 @@ let simulation;
 let sortedComponents, sortedRoutes;
 let showUnusedImports = true;
 let currentSelectedId = null; // Track current selection for re-rendering
+let routesBasePath = 'routes'; // Sent from the extension; used to derive route labels from path ids
+
+// --- Display labels ---
+// Node ids are workspace-relative paths (e.g. "src/lib/Button.svelte"). Components show their
+// basename; routes show the human-readable "(page) /path" form derived from the path. Selection
+// and filtering always use the id, never the label.
+function basename(id) {
+  const seg = id.split('/').pop() || id;
+  return seg.endsWith('.svelte') ? seg.slice(0, -'.svelte'.length) : seg;
+}
+
+function posixDirname(s) {
+  const i = s.lastIndexOf('/');
+  return i === -1 ? '.' : s.slice(0, i);
+}
+
+// Mirrors graphGenerator's original route-naming scheme so labels are unchanged from before.
+function deriveRouteLabel(id, base) {
+  const normalized = id.replace(/\\/g, '/');
+  const match = normalized.match(new RegExp(`(?:^|/)(${base})/(.*)$`));
+  const afterBase = match ? match[2] : normalized;
+  const fileName = afterBase.split('/').pop() || '';
+  let fileType = '';
+  if (fileName.startsWith('+page')) fileType = '(page)';
+  else if (fileName.startsWith('+layout')) fileType = '(layout)';
+  else if (fileName.startsWith('+error')) fileType = '(error)';
+  const routePath = posixDirname(afterBase);
+  return `${fileType} ${routePath || '/'}`;
+}
+
+function displayLabel(node) {
+  return node.type === 'route' ? deriveRouteLabel(node.id, routesBasePath) : basename(node.id);
+}
+
+function labelForId(id) {
+  const node = fullGraphData && fullGraphData.nodes.find((n) => n.id === id);
+  return node ? displayLabel(node) : basename(id);
+}
 
 // Per-category visibility toggles (legend filters)
 const categoryVisible = { parent: true, child: true, route: true, unused: true, default: true };
@@ -66,6 +104,9 @@ window.addEventListener('message', event => {
   const message = event.data;
 
   if (message.command === 'updateGraph') {
+    if (message.routesBasePath) {
+      routesBasePath = message.routesBasePath;
+    }
     initializeGraph(message.data);
   } else if (message.command === 'focusComponent') {
     focusOnComponent(message.componentName, message.nodeType);
@@ -87,13 +128,14 @@ function initializeGraph(graph) {
 
 function focusOnComponent(componentName, nodeType) {
   // Update the appropriate search input to show the selected component
+  const label = labelForId(componentName);
   if (nodeType === 'route') {
-    routeSearchInput.property("value", componentName);
+    routeSearchInput.property("value", label);
     routeClearSearchBtn.style("display", "block");
     searchInput.property("value", "");
     clearSearchBtn.style("display", "none");
   } else {
-    searchInput.property("value", componentName);
+    searchInput.property("value", label);
     clearSearchBtn.style("display", "block");
     routeSearchInput.property("value", "");
     routeClearSearchBtn.style("display", "none");
@@ -111,7 +153,8 @@ function populateResults(listElement, nodes, inputElement, clearBtnElement) {
       .attr("class", "result-item")
       .attr("role", "option")
       .attr("id", `${listElement.attr("id")}-option-${index}`)
-      .text(node.id)
+      .attr("data-node-id", node.id)
+      .text(displayLabel(node))
       .on("click", () => {
         selectOption(node.id, inputElement, listElement, clearBtnElement);
       });
@@ -119,7 +162,7 @@ function populateResults(listElement, nodes, inputElement, clearBtnElement) {
 }
 
 function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
-  inputElement.property("value", nodeId);
+  inputElement.property("value", labelForId(nodeId));
   listElement.style("display", "none");
   inputElement.attr("aria-expanded", "false");
   if (clearBtnElement) {
@@ -136,7 +179,7 @@ function selectOption(nodeId, inputElement, listElement, clearBtnElement) {
   }
 
   updateGraph(nodeId);
-  announceToScreenReader(`Selected ${nodeId}`);
+  announceToScreenReader(`Selected ${labelForId(nodeId)}`);
 }
 
 function updateLegendVisibility(isFocusedView) {
@@ -336,7 +379,7 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => d.id)
+    .text((d) => displayLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
     .attr("y", 3);
@@ -605,7 +648,8 @@ function setupCombobox(input, list, clearBtn, sourceData) {
 
     const searchTerm = input.property("value").toLowerCase();
     const filteredNodes = sourceData.filter((node) =>
-      node.id.toLowerCase().includes(searchTerm)
+      node.id.toLowerCase().includes(searchTerm) ||
+      displayLabel(node).toLowerCase().includes(searchTerm)
     );
     populateResults(list, filteredNodes, input, clearBtn);
     list.style("display", "block");
@@ -685,7 +729,7 @@ function setupCombobox(input, list, clearBtn, sourceData) {
         event.preventDefault();
         if (highlightedIndex >= 0 && highlightedIndex < optionsCount) {
           const selectedOption = d3.select(options.nodes()[highlightedIndex]);
-          const nodeId = selectedOption.text();
+          const nodeId = selectedOption.attr("data-node-id");
           selectOption(nodeId, input, list, clearBtn);
         }
         break;
