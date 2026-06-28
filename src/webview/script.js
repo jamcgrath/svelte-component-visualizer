@@ -380,21 +380,7 @@ function updateGraph(selectedId) {
       event.preventDefault();
       event.stopPropagation();
       showNodeContextMenu(event, d);
-    })
-    .on("mousemove", (event, d) => {
-      // Reveal the node's full workspace-relative path on hover (when showPathOnHover is enabled),
-      // so same-named nodes can be told apart. Follows the cursor; shows instantly, no native delay.
-      if (!showPathOnHover) {
-        graphTooltip.style("display", "none");
-        return;
-      }
-      graphTooltip
-        .text(d.id)
-        .style("display", "block")
-        .style("left", `${event.clientX + 12}px`)
-        .style("top", `${event.clientY + 12}px`);
-    })
-    .on("mouseout", () => graphTooltip.style("display", "none"));
+    });
 
   // Append a circle for components and a rect for routes
   node.each(function(d) {
@@ -415,7 +401,21 @@ function updateGraph(selectedId) {
     .text((d) => baseLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
-    .attr("y", 3);
+    .attr("y", 3)
+    .on("mousemove", (event, d) => {
+      // Reveal the node's full workspace-relative path while hovering its label (when
+      // showPathOnHover is enabled), so same-named nodes can be told apart. Instant, follows cursor.
+      if (!showPathOnHover) {
+        graphTooltip.style("display", "none");
+        return;
+      }
+      graphTooltip
+        .text(d.id)
+        .style("display", "block")
+        .style("left", `${event.clientX + 12}px`)
+        .style("top", `${event.clientY + 12}px`);
+    })
+    .on("mouseout", () => graphTooltip.style("display", "none"));
 
   simulation.on("tick", () => {
     link
