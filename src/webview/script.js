@@ -40,8 +40,37 @@ function deriveRouteLabel(id, base) {
   return `${fileType} ${routePath || '/'}`;
 }
 
+// Component basenames that appear on more than one node (e.g. two Button.svelte in different
+// folders). Recomputed whenever graph data arrives; used to disambiguate otherwise-identical labels.
+let collidingBasenames = new Set();
+
+function computeCollidingBasenames(nodes) {
+  const counts = new Map();
+  nodes.forEach((n) => {
+    if (n.type !== 'component') return; // routes are disambiguated by their path-derived label
+    const b = basename(n.id);
+    counts.set(b, (counts.get(b) || 0) + 1);
+  });
+  collidingBasenames = new Set(
+    [...counts.entries()].filter(([, count]) => count > 1).map(([b]) => b)
+  );
+}
+
+function parentDirName(id) {
+  const parts = id.split('/');
+  return parts.length >= 2 ? parts[parts.length - 2] : '';
+}
+
 function displayLabel(node) {
-  return node.type === 'route' ? deriveRouteLabel(node.id, routesBasePath) : basename(node.id);
+  if (node.type === 'route') {
+    return deriveRouteLabel(node.id, routesBasePath);
+  }
+  const base = basename(node.id);
+  if (collidingBasenames.has(base)) {
+    const dir = parentDirName(node.id);
+    return dir ? `${base} (${dir})` : base;
+  }
+  return base;
 }
 
 function labelForId(id) {
@@ -115,6 +144,7 @@ window.addEventListener('message', event => {
 
 function initializeGraph(graph) {
   fullGraphData = graph;
+  computeCollidingBasenames(graph.nodes);
   const allSortedNodes = [...graph.nodes].sort((a, b) => a.id.localeCompare(b.id));
   sortedComponents = allSortedNodes.filter(n => n.type === 'component');
   sortedRoutes = allSortedNodes.filter(n => n.type === 'route');
