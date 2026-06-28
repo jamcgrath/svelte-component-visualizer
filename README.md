@@ -195,6 +195,8 @@ npm run package
 
 - The first graph generation on very large projects may take a moment (subsequent refreshes are incremental — only changed files are re-parsed)
 - `<svelte:component this={Expr}>` is only tracked when `Expr` is a direct component identifier (computed or conditional targets are not resolved)
+- Component imports are resolved for relative paths and SvelteKit's default `$lib` (→ `src/lib`). Components imported via a remapped `$lib`, a custom Vite/tsconfig alias, or a package specifier still appear as nodes, but can't be opened/revealed (the path can't be resolved back to a file)
+- Named imports from a `.svelte` file that exports non-component bindings (e.g. a store) are drawn as dependencies and may show as "unused" if they aren't used as a component in the template
 - **Drag and drop not supported in browser-based VSCode** (Code OSS, vscode.dev, GitHub Codespaces, cloud workstations) - This is a limitation of webviews in browser environments. Use the context menu "Open in Component Visualizer" instead.
 
 ## Troubleshooting

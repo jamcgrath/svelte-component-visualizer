@@ -12,12 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Named `.svelte` imports are now tracked as dependencies (previously only default imports were)
 - `<svelte:component this={Component}>` dynamic usage is tracked when `this` is a direct component identifier
 - `svelteVisualizer.unconditionalDependencyPaths` setting (array of glob patterns): files matching a pattern treat all of their `.svelte` imports as dependencies regardless of template usage — useful for dynamic renderer components
-- Incremental parsing: per-file parse results are cached by mtime and a `.svelte` file watcher invalidates them, so refreshes only re-parse files that actually changed
+- Incremental parsing: per-file parse results are cached by mtime and size, and a `.svelte` file watcher invalidates them, so refreshes only re-parse files that actually changed
 
 ### Changed
 
 - Graph node ids are now workspace-relative file paths instead of basenames, so two same-named components (e.g. two `Button.svelte` in different folders) no longer collapse into a single node with misrouted edges
-- Colliding display labels are disambiguated with a parent-directory suffix (e.g. `Button (lib)` / `Button (widgets)`); unique names are unchanged
+- Colliding display labels are disambiguated with the shortest distinguishing directory suffix (e.g. `Button (lib)` / `Button (widgets)`, going deeper only when needed), for both components and routes; unique names are unchanged
 - Bumped Svelte to 5.56.4
 
 ### Removed
