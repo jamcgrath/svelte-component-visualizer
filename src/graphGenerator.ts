@@ -41,7 +41,16 @@ function resolveImportId(specifier: string, importingFileAbs: string, workspaceR
         return toNodeId(path.resolve(path.dirname(importingFileAbs), specifier), workspaceRoot);
     }
     if (specifier.startsWith('$lib/')) {
-        return toNodeId(path.join(workspaceRoot, 'src', 'lib', specifier.slice('$lib/'.length)), workspaceRoot);
+        const rest = specifier.slice('$lib/'.length);
+        // $lib points at the `src/lib` of the SvelteKit project the importing file belongs to.
+        // In a monorepo the file lives in a sub-package, so derive that package's src dir from the
+        // file's own path (its last `/src/` segment) rather than assuming the workspace root.
+        const normalized = importingFileAbs.replace(/\\/g, '/');
+        const srcIdx = normalized.lastIndexOf('/src/');
+        const libBase = srcIdx !== -1
+            ? `${normalized.slice(0, srcIdx)}/src/lib`
+            : `${workspaceRoot.replace(/\\/g, '/')}/src/lib`;
+        return toNodeId(`${libBase}/${rest}`, workspaceRoot);
     }
     return specifier.replace(/^\.\//, '');
 }
