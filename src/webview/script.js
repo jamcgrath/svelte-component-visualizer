@@ -135,6 +135,10 @@ const chargeStrengthSlider = d3.select("#charge-strength");
 const linkDistanceValue = d3.select("#link-distance-value");
 const chargeStrengthValue = d3.select("#charge-strength-value");
 
+// Custom hover tooltip — shows the full disambiguated label instantly (the native SVG <title>
+// works but has a ~0.5s browser delay). Created once; positioned/toggled on node hover.
+const graphTooltip = d3.select("body").append("div").attr("class", "graph-tooltip");
+
 // Add arrowhead marker definition
 svg
   .append("defs")
@@ -438,7 +442,22 @@ function updateGraph(selectedId) {
       event.preventDefault();
       event.stopPropagation();
       showNodeContextMenu(event, d);
-    });
+    })
+    .on("mousemove", (event, d) => {
+      // Reveal the full disambiguated label on hover (only when it differs from the short
+      // label already on the canvas). Follows the cursor; shows instantly, no native delay.
+      const full = displayLabel(d);
+      if (full === baseLabel(d)) {
+        graphTooltip.style("display", "none");
+        return;
+      }
+      graphTooltip
+        .text(full)
+        .style("display", "block")
+        .style("left", `${event.clientX + 12}px`)
+        .style("top", `${event.clientY + 12}px`);
+    })
+    .on("mouseout", () => graphTooltip.style("display", "none"));
 
   // Append a circle for components and a rect for routes
   node.each(function(d) {
@@ -456,7 +475,7 @@ function updateGraph(selectedId) {
 
   node
     .append("text")
-    .text((d) => displayLabel(d))
+    .text((d) => baseLabel(d))
     .attr("class", "node-text")
     .attr("x", 12)
     .attr("y", 3);
